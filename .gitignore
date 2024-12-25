@@ -1,0 +1,11 @@
+/.vs
+/Binaries
+/Intermediate
+/Saved
+/Plugins
+/Content/__ExternalObjects__
+/Content/__ExternalActors__
+/Content/Assets/Private
+*.sln
+*_BuiltData.uasset
+/Content/Assets/MilitaryWeapSilver
