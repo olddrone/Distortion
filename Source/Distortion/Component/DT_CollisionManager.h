@@ -43,10 +43,9 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
 	FTimerHandle Handle;
-	float InRate = 0.025f;		// 1frame == 0.017f
+	float InRate = 0.034f;		// 1frame == 0.017f
 	FDamagePacket DamageInfo;
-	FVector BeforeStart, BeforeEnd;
-
+	TArray<FVector_NetQuantize> PresentPoints, BeforePoints;
 	FName StartSocketName, EndSocketName;
 
 	AActor* Character;

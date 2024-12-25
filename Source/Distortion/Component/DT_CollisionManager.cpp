@@ -6,6 +6,8 @@
 
 UDT_CollisionManager::UDT_CollisionManager()
 {
+	PresentPoints.Init(FVector_NetQuantize::ZeroVector, 4);
+	BeforePoints.Init(FVector_NetQuantize::ZeroVector, 4);
 	
 }
 
@@ -25,23 +27,24 @@ void UDT_CollisionManager::StopCollision()
 {
 	GetWorld()->GetTimerManager().ClearTimer(Handle);
 	HitActors.Empty();
-	BeforeStart = BeforeEnd = FVector::ZeroVector;
+
+	for (auto& BeforePoint : BeforePoints)
+		BeforePoint = FVector_NetQuantize::ZeroVector;
 }
 
 void UDT_CollisionManager::TraceCheck()
 {
-	static FVector PresentStart(FVector::ZeroVector), PresentEnd(FVector::ZeroVector);
-
-	PresentStart = MeshInterface->GetSocketLocation(StartSocketName);
-	PresentEnd = MeshInterface->GetSocketLocation(EndSocketName);
+	PresentPoints[0] = MeshInterface->GetSocketLocation(StartSocketName);
+	PresentPoints[3] = MeshInterface->GetSocketLocation(EndSocketName);
+	PresentPoints[1] = FMath::Lerp(PresentPoints[0], PresentPoints[3], 1.0f / 3.0f);
+	PresentPoints[2] = FMath::Lerp(PresentPoints[0], PresentPoints[3], 2.0f / 3.0f);
 
 	TArray<FHitResult> HitResults;
-	if (!BeforeStart.IsZero() && !BeforeEnd.IsZero())
+	if (BeforePoints[0] != FVector_NetQuantize::ZeroVector)
 	{
-		DoSphereTrace(BeforeStart, PresentStart, HitResults, FColor::Orange);
-		DoSphereTrace(BeforeEnd, PresentEnd, HitResults, FColor::Orange);
+		for (int8 i = 0; i < PresentPoints.Num(); ++i)
+			DoSphereTrace(BeforePoints[i], PresentPoints[i], HitResults, FColor::Orange);
 	}
-	DoSphereTrace(PresentStart, PresentEnd, HitResults, FColor::Orange);
 
 	for (const auto& HitResult : HitResults)
 	{
@@ -51,8 +54,9 @@ void UDT_CollisionManager::TraceCheck()
 			ServerRPCDoDamage(HitResult);
 		}
 	}
-	BeforeStart = PresentStart;
-	BeforeEnd = PresentEnd;
+
+	for (int8 i = 0; i < BeforePoints.Num(); ++i)
+		BeforePoints[i] = PresentPoints[i];
 }
 
 void UDT_CollisionManager::DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation, TArray<FHitResult>& HitResults, const FColor& Color)
