@@ -27,6 +27,11 @@ UDT_CombatComponent::UDT_CombatComponent()
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
+UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
+{
+	return (GetEquipWeapon()) ? Weapon->GetMeshComp() : nullptr;
+}
+
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -37,11 +42,6 @@ void UDT_CombatComponent::BeginPlay()
 
 	CollisionManager->SetCharacter(GetOwner());
 	CollisionManager->SetActorsToIgnore(GetOwner());
-}
-
-UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
-{
-	return (GetEquipWeapon()) ? Weapon->GetMeshComp() : nullptr;
 }
 
 void UDT_CombatComponent::ServerRPCAttack_Implementation(const FName& Section)

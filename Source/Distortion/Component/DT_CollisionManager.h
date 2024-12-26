@@ -23,7 +23,7 @@ public:
 
 	void SetActorsToIgnore(AActor* Actor) { ActorsToIgnore.Add(Actor); }
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCDoDamage(const FHitResult& Victim);
 
 	void DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation,
@@ -45,7 +45,9 @@ private:
 	FTimerHandle Handle;
 	float InRate = 0.034f;		// 1frame == 0.017f
 	FDamagePacket DamageInfo;
-	TArray<FVector_NetQuantize> PresentPoints, BeforePoints;
+	UPROPERTY()
+	TArray<FVector_NetQuantize> PresentPoints;
+	TArray<FVector_NetQuantize> BeforePoints;
 	FName StartSocketName, EndSocketName;
 
 	AActor* Character;

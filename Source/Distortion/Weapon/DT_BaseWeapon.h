@@ -8,7 +8,7 @@
 #include "Interface/DT_MeshInterface.h"
 #include "DT_BaseWeapon.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class DISTORTION_API ADT_BaseWeapon : public AActor, public IDT_MeshInterface
 {
 	GENERATED_BODY()
@@ -16,13 +16,13 @@ class DISTORTION_API ADT_BaseWeapon : public AActor, public IDT_MeshInterface
 public:
 	ADT_BaseWeapon();
 
-	virtual void Attack(const FDamagePacket& DamagePacket) {}
+	virtual void Attack(const FDamagePacket& DamagePacket) PURE_VIRTUAL(ADT_BaseWeapon::Attack, );
 	virtual void AttackEnd() {}
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
 
 	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, class UDT_CollisionManager* InCollisionManager);
 
-	virtual UMeshComponent* GetMeshComp() const { return MeshComponent; }
+	virtual UMeshComponent* GetMeshComp() const override { return MeshComponent; }
 	virtual FVector GetSocketLocation(const FName& SocketName) const override;
 
 protected:

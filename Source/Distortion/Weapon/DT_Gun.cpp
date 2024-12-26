@@ -15,7 +15,7 @@ void ADT_Gun::Attack(const FDamagePacket& DamagePacket)
 {
 	if (FireAnimation)
 	{
-		USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(MeshComponent);
-		Mesh->PlayAnimation(FireAnimation, false);
+		USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(MeshComponent);
+		SkeletalMesh->PlayAnimation(FireAnimation, false);
 	}
 }

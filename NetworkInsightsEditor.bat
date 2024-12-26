@@ -1,0 +1,1 @@
+UnrealEditor.exe %cd%/Distortion.uproject -NetTrace=1 -Trace=Net

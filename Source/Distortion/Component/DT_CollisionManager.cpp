@@ -62,7 +62,7 @@ void UDT_CollisionManager::TraceCheck()
 void UDT_CollisionManager::DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation, TArray<FHitResult>& HitResults, const FColor& Color)
 {
 	TArray<FHitResult> TempHitResults;
-	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, 15.f,
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, 8.f,
 		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore,
 		EDrawDebugTrace::ForDuration, TempHitResults, true, Color, FColor::Green, 0.5f);
 

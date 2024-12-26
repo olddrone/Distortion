@@ -24,14 +24,14 @@ public:
 
 	UFUNCTION()
 	void Attack(const FName& Section = "Attack01") { ServerRPCAttack(Section); }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttack(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAttack(const FName& Section);
 
 	UFUNCTION()
 	void Dodge(const FName& Section = "Fwd") { ServerRPCDodge(Section); }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCDodge(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDodge(const FName& Section);
@@ -41,25 +41,24 @@ public:
 
 	UFUNCTION()
 	void Hit(const FName& SectionName = "Fwd") { ServerRPCHit(SectionName); }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCHit(const FName& SectionName);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCHit(const FName& SectionName);
 
 	void CreateWeapon(UDataAsset* DataAsset);
-
 	void EquipCheck() { (bEquipWeapon) ? Equip(false, "Unequip") : Equip(true, "Equip"); }
 
 	UFUNCTION()
 	void Equip(const bool bIsEquip, const FName& SectionName);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCEquip(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCEquip(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType);
 
 	UFUNCTION()
 	void AttachSocket(const FName& SocketName) { ServerRPCAttachSocket(SocketName); }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttachSocket(const FName& SocketName);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAttachSocket(const FName& SocketName);

@@ -53,23 +53,23 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PlayMontage(UAnimMontage* Montage, const FName& SectionName = "Default") override;
 	virtual UMeshComponent* GetMeshComp() const override { return GetMesh(); }
-	virtual FVector GetSocketLocation(const FName& SocketName) const override;
+	virtual FVector GetSocketLocation(const FName& SocketName) const override { return GetMesh()->GetSocketLocation(SocketName); }
 
 public:
 	UFUNCTION()
 	void RMB(bool bHoldRotationYaw);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCRMBDown(bool bHoldRotationYaw);
 
 	UFUNCTION()
 	void SetRotationYaw(bool bHoldRotationYaw);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCSetRotationYaw(bool bHoldRotationYaw);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCDodgeSetRotationYaw(bool bHoldRotationYaw);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCSetRotationYaw(bool bHoldRotationYaw);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -81,7 +81,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bLMBDown = false;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	bool bRMBDown = false;
 
 	float AimOffsetYaw = 0.f;
@@ -111,7 +111,7 @@ public:
 	UFUNCTION()
 	void ImmediateRotate();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerRPCRotate(const FQuat4d& Quat);
 
 	UFUNCTION(NetMulticast, Unreliable)

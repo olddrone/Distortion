@@ -20,6 +20,6 @@ public:
 	virtual void Attack(const FDamagePacket& DamagePacket) override;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimationAsset> FireAnimation;
 };

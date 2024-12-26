@@ -122,11 +122,6 @@ void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionN
 	}
 }
 
-FVector ADT_BaseCharacter::GetSocketLocation(const FName& SocketName) const
-{
-	return GetMesh()->GetSocketLocation(SocketName);
-}
-
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
 	bRMBDown = bHoldRotationYaw;
@@ -147,16 +142,18 @@ void ADT_BaseCharacter::ServerRPCRMBDown_Implementation(bool bHoldRotationYaw)
 
 void ADT_BaseCharacter::SetRotationYaw(bool bHoldRotationYaw)
 {
+	if (bUseControllerRotationYaw == bHoldRotationYaw)
+		return;
 	if (IsLocallyControlled())
 		ServerRPCSetRotationYaw(bHoldRotationYaw);
 }
 
 void ADT_BaseCharacter::ServerRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
-	MulticastRPCDodgeSetRotationYaw(bHoldRotationYaw);
+	MulticastRPCSetRotationYaw(bHoldRotationYaw);
 }
 
-void ADT_BaseCharacter::MulticastRPCDodgeSetRotationYaw_Implementation(bool bHoldRotationYaw)
+void ADT_BaseCharacter::MulticastRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
 	bUseControllerRotationYaw = bHoldRotationYaw;
 	GetCharacterMovement()->bOrientRotationToMovement = !bHoldRotationYaw;

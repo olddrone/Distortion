@@ -40,7 +40,6 @@ void ADT_PlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 	FVector Start = GetActorLocation();
 	Start.Z = 5.f;
 	const FVector Forward = GetActorForwardVector().GetSafeNormal();
