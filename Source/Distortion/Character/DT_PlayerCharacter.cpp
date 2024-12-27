@@ -65,9 +65,9 @@ void ADT_PlayerCharacter::BeginPlay()
 
 	if (IsValid(controller))
 	{
-		controller->DodgeDelegate.AddDynamic(this, &ADT_BaseCharacter::Dodge);
-		controller->RMBDelegate.AddDynamic(this, &ADT_BaseCharacter::RMB);
-		controller->LMBDelegate.AddDynamic(this, &ADT_BaseCharacter::Attack);
-		controller->EquipDelegate.AddDynamic(this, &ADT_BaseCharacter::Equip);
+		controller->DodgeDelegate.BindUObject(this, &ADT_BaseCharacter::Dodge);
+		controller->RMBDelegate.BindUObject(this, &ADT_BaseCharacter::RMB);
+		controller->LMBDelegate.BindUObject(this, &ADT_BaseCharacter::Attack);
+		controller->EquipDelegate.BindUObject(this, &ADT_BaseCharacter::Equip);
 	}
 }

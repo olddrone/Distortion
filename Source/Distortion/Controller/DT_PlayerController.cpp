@@ -72,7 +72,7 @@ void ADT_PlayerController::Jump()
 void ADT_PlayerController::Dodge()
 {
 	if (DodgeDelegate.IsBound())
-		DodgeDelegate.Broadcast();
+		DodgeDelegate.Execute();
 }
 
 void ADT_PlayerController::Crouch()
@@ -86,19 +86,19 @@ void ADT_PlayerController::Crouch()
 void ADT_PlayerController::RMBStart()
 {
 	if (RMBDelegate.IsBound())
-		RMBDelegate.Broadcast(true);
+		RMBDelegate.Execute(true);
 }
 
 void ADT_PlayerController::RMBEnd()
 {
 	if (RMBDelegate.IsBound())
-		RMBDelegate.Broadcast(false);
+		RMBDelegate.Execute(false);
 }
 
 void ADT_PlayerController::LMB()
 {
 	if (LMBDelegate.IsBound())
-		LMBDelegate.Broadcast();
+		LMBDelegate.Execute();
 
 	if (StateInterface)
 		StateInterface->SetLMBDown(true);
@@ -107,5 +107,5 @@ void ADT_PlayerController::LMB()
 void ADT_PlayerController::Equip()
 {
 	if (EquipDelegate.IsBound())
-		EquipDelegate.Broadcast();
+		EquipDelegate.Execute();
 }
