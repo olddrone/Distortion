@@ -27,11 +27,6 @@ UDT_CombatComponent::UDT_CombatComponent()
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
-UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
-{
-	return (GetEquipWeapon()) ? Weapon->GetMeshComp() : nullptr;
-}
-
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -44,6 +39,16 @@ void UDT_CombatComponent::BeginPlay()
 	CollisionManager->SetActorsToIgnore(GetOwner());
 }
 
+UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
+{
+	return (GetEquipWeapon()) ? Weapon->GetMeshComp() : nullptr;
+}
+
+void UDT_CombatComponent::Attack(const FName& Section)
+{
+	ServerRPCAttack(Section);
+}
+
 void UDT_CombatComponent::ServerRPCAttack_Implementation(const FName& Section)
 {
 	MulticastRPCAttack(Section);
@@ -54,8 +59,13 @@ void UDT_CombatComponent::MulticastRPCAttack_Implementation(const FName& Section
 	UAnimMontage* PlayMontage = BaseAttackMontage;
 	if (GetEquipWeapon() && IsValid(WeaponData))
 		PlayMontage = WeaponData->AttackMontage;
+	if (CombatInterface)
+		CombatInterface->PlayMontage(PlayMontage, Section);
+}
 
-	CombatInterface->PlayMontage(PlayMontage, Section);
+void UDT_CombatComponent::Dodge(const FName& Section)
+{
+	ServerRPCDodge(Section);
 }
 
 void UDT_CombatComponent::ServerRPCDodge_Implementation(const FName& Section)
@@ -75,6 +85,7 @@ void UDT_CombatComponent::CollisionStart(const FDamagePacket& DamagePacket)
 		if (GetEquipWeapon()) 
 		{
 			Weapon->Attack(DamagePacket);
+			SetFXVisibility(true);
 		}
 		else
 		{
@@ -89,7 +100,10 @@ void UDT_CombatComponent::CollisionEnd()
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
 		if (GetEquipWeapon())
+		{
 			Weapon->AttackEnd();
+			SetFXVisibility(false);
+		}
 		else
 			CollisionManager->StopCollision();
 	}
@@ -147,4 +161,23 @@ void UDT_CombatComponent::ServerRPCAttachSocket_Implementation(const FName& Sock
 void UDT_CombatComponent::MulticastRPCAttachSocket_Implementation(const FName& SocketName)
 {
 	Weapon->AttachMeshToSocket(MeshInterface->GetMeshComp(), SocketName);
+}
+
+
+void UDT_CombatComponent::SetFXVisibility(const bool bVisible)
+{
+	ServerPRCSetFXVisibility(bVisible);
+}
+
+void UDT_CombatComponent::ServerPRCSetFXVisibility_Implementation(const bool bVisible)
+{
+	MulticastRPCSetFXVisibility(bVisible);
+}
+
+void UDT_CombatComponent::MulticastRPCSetFXVisibility_Implementation(const bool bVisible)
+{
+	if (Weapon)
+	{
+		Weapon->SetFXVisibility(bVisible);
+	}
 }

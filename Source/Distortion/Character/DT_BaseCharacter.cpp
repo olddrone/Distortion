@@ -237,31 +237,30 @@ void ADT_BaseCharacter::Equip()
 	CombatComp->EquipCheck();
 }
 
-void ADT_BaseCharacter::DoAttack(const FName& Section)
+void ADT_BaseCharacter::Attack()
+{
+	FName SectionName = (GetEquipWeaponType() == EWeaponType::EWT_Gun) ? "Hip" :"Attack01";
+	DoAttack(SectionName);
+}
+
+void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 {
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
 
 	SetActionState(EActionState::EAS_Attack);
 
-	// ¼öÁ¤ ¿ä¸Á
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
-	{
-		CombatComp->Attack(Section);
 		ImmediateRotate();
-	}
-	else
-	{
-		CombatComp->Attack("Hip");
-	}
+	CombatComp->Attack(SectionName);
 }
 
-void ADT_BaseCharacter::AttackStart(const FDamagePacket& DamagePacket)
+void ADT_BaseCharacter::ActivateCollision(const FDamagePacket& DamagePacket)
 {
 	CombatComp->CollisionStart(DamagePacket);
 }
 
-void ADT_BaseCharacter::AttackEnd()
+void ADT_BaseCharacter::DeactivateCollision()
 {
 	CombatComp->CollisionEnd();
 }

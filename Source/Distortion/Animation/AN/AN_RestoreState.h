@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Data/DT_StateSet.h"
-#include "Interface/DT_StateInterface.h"
 #include "AN_RestoreState.generated.h"
 
 /**

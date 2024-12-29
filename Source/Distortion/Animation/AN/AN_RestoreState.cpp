@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AN_RestoreState.h"
+#include "Interface/DT_StateInterface.h"
 
 void UAN_RestoreState::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, 
 	const FAnimNotifyEventReference& EventReference)

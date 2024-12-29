@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ANS_HitCheck.h"
+#include "ANS_DoCollision.h"
 #include "Interface/DT_CombatInterface.h"
 
-void UANS_HitCheck::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+void UANS_DoCollision::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
@@ -11,11 +11,11 @@ void UANS_HitCheck::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	{
 		IDT_CombatInterface* Interface = Cast<IDT_CombatInterface>(MeshComp->GetOwner());
 		if (Interface)
-			Interface->AttackStart(DamagePacket);
+			Interface->ActivateCollision(DamagePacket);
 	}
 }
 
-void UANS_HitCheck::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, 
+void UANS_DoCollision::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
@@ -23,6 +23,6 @@ void UANS_HitCheck::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 	{
 		IDT_CombatInterface* Interface = Cast<IDT_CombatInterface>(MeshComp->GetOwner());
 		if (Interface)
-			Interface->AttackEnd();
+			Interface->DeactivateCollision();
 	}
 }

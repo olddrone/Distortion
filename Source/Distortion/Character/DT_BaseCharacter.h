@@ -100,7 +100,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void Attack() { DoAttack(); }
+	void Attack();
 
 	UFUNCTION()
 	void Dodge();
@@ -121,9 +121,9 @@ public:
 	void Equip();
 
 public:
-	virtual void DoAttack(const FName& Section = "Attack01") override;
-	virtual void AttackStart(const FDamagePacket& DamagePacket) override;
-	virtual void AttackEnd() override;
+	virtual void DoAttack(const FName& SectionName = "Attack01") override;
+	virtual void ActivateCollision(const FDamagePacket& DamagePacket) override;
+	virtual void DeactivateCollision() override;
 
 public:
 	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount) override;

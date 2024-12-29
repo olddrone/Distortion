@@ -5,7 +5,6 @@
 
 ADT_BaseWeapon::ADT_BaseWeapon()
 {
-
 }
 
 void ADT_BaseWeapon::BeginPlay()

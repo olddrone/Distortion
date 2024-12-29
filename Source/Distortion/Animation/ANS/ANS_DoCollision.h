@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "Data/DT_DamageData.h"
-#include "ANS_HitCheck.generated.h"
+#include "ANS_DoCollision.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DISTORTION_API UANS_HitCheck : public UAnimNotifyState
+class DISTORTION_API UANS_DoCollision : public UAnimNotifyState
 {
 	GENERATED_BODY()
 public:

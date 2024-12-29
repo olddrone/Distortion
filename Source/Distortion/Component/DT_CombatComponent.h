@@ -23,14 +23,14 @@ public:
 	UDT_CombatComponent();
 
 	UFUNCTION()
-	void Attack(const FName& Section = "Attack01") { ServerRPCAttack(Section); }
+	void Attack(const FName& Section = "Attack01");
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttack(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAttack(const FName& Section);
 
 	UFUNCTION()
-	void Dodge(const FName& Section = "Fwd") { ServerRPCDodge(Section); }
+	void Dodge(const FName& Section = "Fwd");
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCDodge(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
@@ -101,4 +101,12 @@ private:
 	UPROPERTY()
 	TObjectPtr<UDT_CollisionManager> CollisionManager;
 
+
+public:
+	UFUNCTION()
+	void SetFXVisibility(const bool bVisible);
+	UFUNCTION(Server,Unreliable)
+	void ServerPRCSetFXVisibility(const bool bVisible);
+	UFUNCTION(NetMulticast,Unreliable)
+	void MulticastRPCSetFXVisibility(const bool bVisible);
 };

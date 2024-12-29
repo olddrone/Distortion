@@ -20,8 +20,8 @@ public:
 	virtual void PlayMontage(class UAnimMontage* Montage, const FName& SectionName = "Default") = 0;
 
 	virtual void DoAttack(const FName& Section) = 0;
-	virtual void AttackStart(const struct FDamagePacket& DamagePacket) = 0;
-	virtual void AttackEnd() = 0;
+	virtual void ActivateCollision(const struct FDamagePacket& DamagePacket) = 0;
+	virtual void DeactivateCollision() = 0;
 
 	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount) = 0;
 };

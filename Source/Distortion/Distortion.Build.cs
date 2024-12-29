@@ -17,7 +17,8 @@ public class Distortion : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore", 
-			"EnhancedInput" 
-		});
+			"EnhancedInput",
+            "Niagara",
+        });
     }
 }

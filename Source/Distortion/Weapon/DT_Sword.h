@@ -22,10 +22,15 @@ public:
 	virtual void AttackEnd() override;
 
 	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_CollisionManager* InCollisionManager) override;
+
+	virtual void SetFXVisibility(const bool bVisible)  override;
 protected:
 	virtual void BeginPlay() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDT_CollisionManager> CollisionManager;
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> TrailEffect;
 };

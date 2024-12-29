@@ -24,6 +24,7 @@ public:
 
 	virtual UMeshComponent* GetMeshComp() const override { return MeshComponent; }
 	virtual FVector GetSocketLocation(const FName& SocketName) const override;
+	virtual void SetFXVisibility(const bool bVisible)  PURE_VIRTUAL(ADT_BaseWeapon::SetFXVisibility, );
 
 protected:
 	virtual void BeginPlay() override;

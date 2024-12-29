@@ -17,9 +17,15 @@ class DISTORTION_API ADT_Gun : public ADT_BaseWeapon
 public:
 	ADT_Gun();
 
-	virtual void Attack(const FDamagePacket& DamagePacket) override;
+	virtual void Tick(float DeltaTime) override;
 
-private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	virtual void Attack(const FDamagePacket& DamagePacket) override { }
+	virtual void SetFXVisibility(const bool bVisible) override;
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+protected:
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAnimationAsset> FireAnimation;
+
+	FVector HitTarget;
 };
