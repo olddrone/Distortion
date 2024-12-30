@@ -12,14 +12,12 @@ class UDT_ObjectPooledInterface : public UInterface
 	GENERATED_BODY()
 };
 
+
 class DISTORTION_API IDT_ObjectPooledInterface
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void OnSpawnFromPool();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void OnReturnToPool();
+	virtual void OnSpawnFromPool(const FVector_NetQuantize& Location, const FRotator& Rotation) = 0;
+	virtual void OnReturnToPool() = 0;
 };

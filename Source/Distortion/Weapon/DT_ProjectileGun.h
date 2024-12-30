@@ -24,5 +24,5 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> ProjectileClass;
 	// TSubclassOf<class ADT_Projectile> ProjectileClass;
-	
+
 };

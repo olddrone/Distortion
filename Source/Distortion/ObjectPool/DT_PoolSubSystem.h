@@ -31,17 +31,15 @@ public:
     void InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxSize);
 
     UFUNCTION(BlueprintCallable)
-    void SpawnFromPool(TSubclassOf<AActor> PoolClass, FVector Location, FRotator Rotation, AActor*& SpawnedActor);
+    void SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation, AActor*& SpawnedActor);
 
     UFUNCTION(BlueprintCallable)
     void ReturnToPool(AActor* Poolable);
 
 private:
-    AActor* GetActorFromPool(TSubclassOf<AActor> PoolClass, FVector Location, FRotator Rotation);
+    AActor* GetActorFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation);
 
 private:
     UPROPERTY()
     TMap<UClass*, FPoolArray> ObjectPools;
-
-
 };

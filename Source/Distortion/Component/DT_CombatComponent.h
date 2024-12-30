@@ -57,7 +57,10 @@ public:
 	void MulticastRPCEquip(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType);
 
 	UFUNCTION()
-	void AttachSocket(const FName& SocketName) { ServerRPCAttachSocket(SocketName); }
+	void AttachSocket(const FName& SocketName) {
+		if (Cast<APawn>(GetOwner())->IsLocallyControlled())
+			ServerRPCAttachSocket(SocketName); 
+	}
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttachSocket(const FName& SocketName);
 	UFUNCTION(NetMulticast, Unreliable)

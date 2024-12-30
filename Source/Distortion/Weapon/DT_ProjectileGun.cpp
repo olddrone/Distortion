@@ -4,6 +4,7 @@
 #include "DT_ProjectileGun.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "ObjectPool/DT_PoolSubSystem.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket)
 {
@@ -20,6 +21,6 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket)
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnedActor);
-
+		
 	}
 }

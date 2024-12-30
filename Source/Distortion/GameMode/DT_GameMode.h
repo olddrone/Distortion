@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "DT_GameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DISTORTION_API ADT_GameMode : public AGameModeBase
+class DISTORTION_API ADT_GameMode : public AGameMode
 {
 	GENERATED_BODY()
 
