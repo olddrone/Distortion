@@ -14,11 +14,12 @@ void UDT_PoolSubSystem::InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxS
         
         if (NewActor && PoolClass.Get()->ImplementsInterface(UDT_ObjectPooledInterface::StaticClass())) 
         {
+            NewActor->SetActorHiddenInGame(true);
+            NewActor->SetActorEnableCollision(false);
+
             IDT_ObjectPooledInterface* Interface = Cast<IDT_ObjectPooledInterface>(NewActor);
             Interface->OnReturnToPool();
 
-            NewActor->SetActorHiddenInGame(true);
-            NewActor->SetActorEnableCollision(false);
             ObjectPool.Add(NewActor);
         }
     }
@@ -26,7 +27,6 @@ void UDT_PoolSubSystem::InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxS
 
 void UDT_PoolSubSystem::SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation, AActor*& SpawnedActor)
 {
-    
     SpawnedActor = GetActorFromPool(PoolClass, Location, Rotation);
 }
 
@@ -38,10 +38,14 @@ void UDT_PoolSubSystem::ReturnToPool(AActor* Poolable)
 
     if (ActorClass->ImplementsInterface(UDT_ObjectPooledInterface::StaticClass()))
     {
-        IDT_ObjectPooledInterface* Interface = Cast<IDT_ObjectPooledInterface>(Poolable);
-        Interface->OnReturnToPool();
+        Poolable->SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
         Poolable->SetActorHiddenInGame(true);
         Poolable->SetActorEnableCollision(false);
+        Poolable->SetActorTickEnabled(false);
+
+        IDT_ObjectPooledInterface* Interface = Cast<IDT_ObjectPooledInterface>(Poolable);
+        Interface->OnReturnToPool();
+
         FPoolArray& ObjectPool = ObjectPools.FindOrAdd(ActorClass);
         ObjectPool.Add(Poolable);
     }

@@ -12,6 +12,9 @@ ADT_ItemBox::ADT_ItemBox()
 
 	OverlapComp = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapComp"));
 	OverlapComp->SetupAttachment(GetRootComponent());
+	OverlapComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	OverlapComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	OverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	NetUpdateFrequency = 1.0f;
 
@@ -20,10 +23,6 @@ ADT_ItemBox::ADT_ItemBox()
 void ADT_ItemBox::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OverlapComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	OverlapComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-	OverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ADT_ItemBox::OnSphereOverlap);
 }

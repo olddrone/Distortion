@@ -34,4 +34,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	float ProjectileSpeed = 3500.0f;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UParticleSystem> TraceParticle;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UParticleSystemComponent> TraceComponent;
+
+	FTimerHandle Handle;
 };

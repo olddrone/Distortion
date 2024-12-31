@@ -4,16 +4,21 @@
 #include "Components/BoxComponent.h"
 #include "ObjectPool/DT_PoolSubSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
 
 ADT_Projectile::ADT_Projectile()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionBox);
-	CollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
@@ -22,21 +27,36 @@ ADT_Projectile::ADT_Projectile()
 
 void ADT_Projectile::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
 	CollisionBox->OnComponentHit.AddUniqueDynamic(this, &ADT_Projectile::OnHit);
 }
 
 void ADT_Projectile::OnSpawnFromPool(const FVector_NetQuantize& Location, const FRotator& Rotation)
 {
 	SetActorEnableCollision(true);
-
+	
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-	ProjectileMovementComponent->bSimulationEnabled = true;
 	FVector Direction = GetActorForwardVector().GetSafeNormal();
 	ProjectileMovementComponent->Velocity = Direction * ProjectileSpeed;
-	ProjectileMovementComponent->Activate();
 
+	ProjectileMovementComponent->SetUpdatedComponent(CollisionBox);
+	ProjectileMovementComponent->bSimulationEnabled = true;
+	ProjectileMovementComponent->UpdateComponentVelocity();
+	ProjectileMovementComponent->Activate();
+	if (TraceParticle)
+	{
+		TraceComponent = UGameplayStatics::SpawnEmitterAttached(TraceParticle, CollisionBox,
+			FName(), GetActorLocation(), GetActorRotation(), EAttachLocation::KeepWorldPosition);
+	}
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(Handle))
+		GetWorld()->GetTimerManager().ClearTimer(Handle);
+
+	//FTimerHandle Handle;
+	//GetWorld()->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([&] {
+	//	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
+	//	PoolSubSystem->ReturnToPool(this);
+	//	}), 1.5f, false, -1.0f);
 }
 
 void ADT_Projectile::OnReturnToPool()
@@ -44,8 +64,8 @@ void ADT_Projectile::OnReturnToPool()
 	SetActorEnableCollision(false);
 
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	ProjectileMovementComponent->bSimulationEnabled = false;
+	ProjectileMovementComponent->UpdateComponentVelocity();
 	ProjectileMovementComponent->Deactivate();
 
 }
@@ -55,6 +75,8 @@ void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
 
-	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
-	PoolSubSystem->ReturnToPool(this);
+	GetWorld()->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([&] {
+		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
+		PoolSubSystem->ReturnToPool(this);
+	}), .5f, false, -1.0f);
 }

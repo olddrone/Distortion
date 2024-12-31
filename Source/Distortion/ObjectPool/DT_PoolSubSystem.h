@@ -27,13 +27,13 @@ class DISTORTION_API UDT_PoolSubSystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION()
     void InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxSize);
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION()
     void SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation, AActor*& SpawnedActor);
-
-    UFUNCTION(BlueprintCallable)
+    
+    UFUNCTION()
     void ReturnToPool(AActor* Poolable);
 
 private:
