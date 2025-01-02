@@ -19,4 +19,5 @@ class DISTORTION_API IDT_MeshInterface
 public:
 	virtual UMeshComponent* GetMeshComp() const = 0;
 	virtual FVector GetSocketLocation(const FName& SocketName) const = 0;
+
 };

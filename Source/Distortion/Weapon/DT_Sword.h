@@ -18,7 +18,7 @@ class DISTORTION_API ADT_Sword : public ADT_BaseWeapon
 public:
 	ADT_Sword();
 
-	virtual void Attack(const FDamagePacket& DamagePacket) override;
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override;
 	virtual void AttackEnd() override;
 
 	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_CollisionManager* InCollisionManager) override;

@@ -30,7 +30,7 @@ void ADT_Sword::BeginPlay()
 	TrailEffect->Deactivate();
 }
 
-void ADT_Sword::Attack(const FDamagePacket& DamagePacket)
+void ADT_Sword::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
 {
 	if (IsValid(CollisionManager))
 	{

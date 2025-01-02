@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -51,7 +52,8 @@ void UDT_CollisionManager::TraceCheck()
 		if (HitActors.Find(HitResult.GetActor()) == INDEX_NONE)
 		{
 			HitActors.Emplace(HitResult.GetActor());
-			ServerRPCDoDamage(HitResult);
+			DoDamage(HitResult);
+			// ServerRPCDoDamage(HitResult);
 		}
 	}
 
@@ -59,17 +61,7 @@ void UDT_CollisionManager::TraceCheck()
 		BeforePoints[i] = PresentPoints[i];
 }
 
-void UDT_CollisionManager::DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation, TArray<FHitResult>& HitResults, const FColor& Color)
-{
-	TArray<FHitResult> TempHitResults;
-	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, 8.f,
-		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore,
-		EDrawDebugTrace::None, TempHitResults, true, Color, FColor::Green, 0.5f);
-
-	HitResults.Append(TempHitResults);
-}
-
-void UDT_CollisionManager::ServerRPCDoDamage_Implementation(const FHitResult& Victim)
+void UDT_CollisionManager::DoDamage(const FHitResult& Victim)
 {
 	if (!Character)
 		return;
@@ -80,3 +72,14 @@ void UDT_CollisionManager::ServerRPCDoDamage_Implementation(const FHitResult& Vi
 	if (VictimInterface)
 		VictimInterface->GetHit(InstigatorLocation, 10);
 }
+
+void UDT_CollisionManager::DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation, TArray<FHitResult>& HitResults, const FColor& Color)
+{
+	TArray<FHitResult> TempHitResults;
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, 8.f,
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore,
+		EDrawDebugTrace::ForDuration, TempHitResults, true, Color, FColor::Green, 0.5f);
+
+	HitResults.Append(TempHitResults);
+}
+

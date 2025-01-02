@@ -15,14 +15,13 @@ class DISTORTION_API ADT_ProjectileGun : public ADT_Gun
 	GENERATED_BODY()
 	
 public:
+	ADT_ProjectileGun();
 
-	virtual void Attack(const FDamagePacket& DamagePacket) override final;
 
-
-private:
+public:
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override final;
 	
+private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> ProjectileClass;
-	// TSubclassOf<class ADT_Projectile> ProjectileClass;
-
 };

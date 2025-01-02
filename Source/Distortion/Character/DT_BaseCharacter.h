@@ -137,6 +137,14 @@ public:
 public:
 	void SimProxiesTurn();
 
+	void AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
+
 private:
 	bool bRotateRootBone;
 	float TurnThreshold = 0.5f;

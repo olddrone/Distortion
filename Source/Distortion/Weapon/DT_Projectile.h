@@ -18,6 +18,17 @@ public:
 	virtual void OnSpawnFromPool(const FVector_NetQuantize& Location, const FRotator& Rotation) override;
 	virtual void OnReturnToPool() override;
 
+
+	UFUNCTION()
+	void ShowTrace();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerPRCShowTrace();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulitcastRPCShowTrace();
+
+
 protected:
 	virtual void BeginPlay() override;
 

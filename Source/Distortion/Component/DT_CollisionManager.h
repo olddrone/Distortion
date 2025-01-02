@@ -23,8 +23,10 @@ public:
 
 	void SetActorsToIgnore(AActor* Actor) { ActorsToIgnore.Add(Actor); }
 
-	UFUNCTION(Server, Unreliable)
-	void ServerRPCDoDamage(const FHitResult& Victim);
+	void DoDamage(const FHitResult& Victim);
+
+	// UFUNCTION(Server, Unreliable)
+	// void ServerRPCDoDamage(const FHitResult& Victim);
 
 	void DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation,
 		TArray<FHitResult>& HitResults, const FColor& Color);

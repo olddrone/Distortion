@@ -23,28 +23,36 @@ public:
 	UDT_CombatComponent();
 
 	UFUNCTION()
-	void Attack(const FName& Section = "Attack01");
+	void Attack(const FName& Section = "Attack01") { ServerRPCAttack(Section); }
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttack(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAttack(const FName& Section);
 
 	UFUNCTION()
-	void Dodge(const FName& Section = "Fwd");
+	void Dodge(const FName& Section = "Fwd"){ ServerRPCDodge(Section); }
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCDodge(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDodge(const FName& Section);
 
 	void CollisionStart(const FDamagePacket& DamagePacket);
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCCollisionStart(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget);
+
 	void CollisionEnd();
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCCollisionEnd();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCShowCosmetic(const bool bIsShow);
 
 	UFUNCTION()
 	void Hit(const FName& SectionName = "Fwd") { ServerRPCHit(SectionName); }
 	UFUNCTION(Server, Unreliable)
-	void ServerRPCHit(const FName& SectionName);
+	void ServerRPCHit(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCHit(const FName& SectionName);
+	void MulticastRPCHit(const FName& Section);
 
 	void CreateWeapon(UDataAsset* DataAsset);
 	void EquipCheck() { (bEquipWeapon) ? Equip(false, "Unequip") : Equip(true, "Equip"); }
@@ -71,9 +79,13 @@ public:
 	FORCEINLINE bool GetEquipWeapon() const { return bEquipWeapon; }
 	FORCEINLINE bool GetHasEquipWeapon() const { return Weapon != nullptr; }
 	FORCEINLINE UMeshComponent* GetWeaponMesh() const;
+	FTransform GetMeshSocketTransform(const FName& SocketName);
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -104,12 +116,4 @@ private:
 	UPROPERTY()
 	TObjectPtr<UDT_CollisionManager> CollisionManager;
 
-
-public:
-	UFUNCTION()
-	void SetFXVisibility(const bool bVisible);
-	UFUNCTION(Server,Unreliable)
-	void ServerPRCSetFXVisibility(const bool bVisible);
-	UFUNCTION(NetMulticast,Unreliable)
-	void MulticastRPCSetFXVisibility(const bool bVisible);
 };

@@ -19,7 +19,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(const FDamagePacket& DamagePacket) override { }
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override { }
 	virtual void SetFXVisibility(const bool bVisible) override;
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
@@ -27,5 +27,4 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAnimationAsset> FireAnimation;
 
-	FVector HitTarget;
 };

@@ -4,6 +4,8 @@
 #include "Component/DT_CollisionManager.h"
 #include "Weapon/DT_BaseWeapon.h"
 #include "Library/DT_CustomLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
@@ -44,9 +46,10 @@ UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
 	return (GetEquipWeapon()) ? Weapon->GetMeshComp() : nullptr;
 }
 
-void UDT_CombatComponent::Attack(const FName& Section)
+FTransform UDT_CombatComponent::GetMeshSocketTransform(const FName& SocketName)
 {
-	ServerRPCAttack(Section);
+	USkeletalMeshComponent* MeshComp = Cast<USkeletalMeshComponent>(Weapon->GetMeshComp());
+	return MeshComp->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_World);
 }
 
 void UDT_CombatComponent::ServerRPCAttack_Implementation(const FName& Section)
@@ -59,13 +62,8 @@ void UDT_CombatComponent::MulticastRPCAttack_Implementation(const FName& Section
 	UAnimMontage* PlayMontage = BaseAttackMontage;
 	if (GetEquipWeapon() && IsValid(WeaponData))
 		PlayMontage = WeaponData->AttackMontage;
-	if (CombatInterface)
-		CombatInterface->PlayMontage(PlayMontage, Section);
-}
 
-void UDT_CombatComponent::Dodge(const FName& Section)
-{
-	ServerRPCDodge(Section);
+	CombatInterface->PlayMontage(PlayMontage, Section);
 }
 
 void UDT_CombatComponent::ServerRPCDodge_Implementation(const FName& Section)
@@ -78,58 +76,24 @@ void UDT_CombatComponent::MulticastRPCDodge_Implementation(const FName& Section)
 	CombatInterface->PlayMontage(DodgeMontage, Section);
 }
 
-void UDT_CombatComponent::CollisionStart(const FDamagePacket& DamagePacket)
+void UDT_CombatComponent::ServerRPCHit_Implementation(const FName& Section)
 {
-	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
-	{
-		if (GetEquipWeapon()) 
-		{
-			Weapon->Attack(DamagePacket);
-			SetFXVisibility(true);
-		}
-		else
-		{
-			CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
-			CollisionManager->DoCollision(GetOwner());
-		}
-	}
+	MulticastRPCHit(Section);
 }
 
-void UDT_CombatComponent::CollisionEnd()
+void UDT_CombatComponent::MulticastRPCHit_Implementation(const FName& Section)
 {
-	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
-	{
-		if (GetEquipWeapon())
-		{
-			Weapon->AttackEnd();
-			SetFXVisibility(false);
-		}
-		else
-			CollisionManager->StopCollision();
-	}
-}
-
-void UDT_CombatComponent::ServerRPCHit_Implementation(const FName& SectionName)
-{
-	MulticastRPCHit(SectionName);
-}
-
-void UDT_CombatComponent::MulticastRPCHit_Implementation(const FName& SectionName)
-{
-	CombatInterface->PlayMontage(HitMontage, SectionName);
+	CombatInterface->PlayMontage(HitMontage, Section);
 }
 
 void UDT_CombatComponent::CreateWeapon(UDataAsset* DataAsset)
 {
 	WeaponData = Cast<UDA_Weapon>(DataAsset);
-	if (IsValid(WeaponData))
+	if (IsValid(WeaponData) && IsValid(WeaponData->WeaponClass))
 	{
-		if (WeaponData->WeaponClass)
-		{
-			// 나중에 SpawnActorDeferred로 변경
-			Weapon = GetWorld()->SpawnActor<ADT_BaseWeapon>(WeaponData->WeaponClass);
-			Weapon->Equip(Cast<APawn>(GetOwner()), WeaponData->HolsterSocketName, CollisionManager);
-		}
+		// 나중에 SpawnActorDeferred로 변경
+		Weapon = GetWorld()->SpawnActor<ADT_BaseWeapon>(WeaponData->WeaponClass);
+		Weapon->Equip(Cast<APawn>(GetOwner()), WeaponData->HolsterSocketName, CollisionManager);
 	}
 }
 
@@ -163,21 +127,71 @@ void UDT_CombatComponent::MulticastRPCAttachSocket_Implementation(const FName& S
 	Weapon->AttachMeshToSocket(MeshInterface->GetMeshComp(), SocketName);
 }
 
-
-void UDT_CombatComponent::SetFXVisibility(const bool bVisible)
+void UDT_CombatComponent::CollisionStart(const FDamagePacket& DamagePacket)
 {
-	ServerPRCSetFXVisibility(bVisible);
-}
-
-void UDT_CombatComponent::ServerPRCSetFXVisibility_Implementation(const bool bVisible)
-{
-	MulticastRPCSetFXVisibility(bVisible);
-}
-
-void UDT_CombatComponent::MulticastRPCSetFXVisibility_Implementation(const bool bVisible)
-{
-	if (Weapon)
+	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
-		Weapon->SetFXVisibility(bVisible);
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerRPCCollisionStart(DamagePacket, HitResult.ImpactPoint);
 	}
+}
+
+void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
+{
+	if (GetEquipWeapon())
+	{
+		Weapon->Attack(DamagePacket, TraceHitTarget);
+		MulticastRPCShowCosmetic(true);
+	}
+	else
+	{
+		CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
+		CollisionManager->DoCollision(GetOwner());
+	}
+}
+
+void UDT_CombatComponent::CollisionEnd()
+{
+	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
+		ServerRPCCollisionEnd();
+}
+
+void UDT_CombatComponent::MulticastRPCShowCosmetic_Implementation(const bool bIsShow)
+{
+	Weapon->SetFXVisibility(bIsShow);
+}
+
+void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation, CrosshairWorldPosition, CrosshairWorldDirection);
+
+	if (bScreenToWorld)
+	{
+		FVector Start = CrosshairWorldPosition;
+		FVector End = Start + CrosshairWorldDirection * 80000;
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);  
+		if (!TraceHitResult.bBlockingHit)
+			TraceHitResult.ImpactPoint = End;
+	}
+}
+
+void UDT_CombatComponent::ServerRPCCollisionEnd_Implementation()
+{
+	if (GetEquipWeapon())
+	{
+		Weapon->AttackEnd();
+		MulticastRPCShowCosmetic(false);
+	}
+	else
+		CollisionManager->StopCollision();
 }

@@ -25,6 +25,7 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 
 	AttributeComp = CreateDefaultSubobject<UDT_AttributeComponent>(TEXT("AttributeComponent"));
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
+	
 }
 
 void ADT_BaseCharacter::BeginPlay()
@@ -161,9 +162,7 @@ void ADT_BaseCharacter::MulticastRPCSetRotationYaw_Implementation(bool bHoldRota
 
 FTransform ADT_BaseCharacter::GetWeaponSocketTransform(const FName& SocketName) const
 {
-	if (!IsValid(CombatComp->GetWeaponMesh()))
-		return FTransform();
-	return CombatComp->GetWeaponMesh()->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_World);
+	return CombatComp->GetMeshSocketTransform(SocketName);
 }
 
 void ADT_BaseCharacter::Dodge()
@@ -257,11 +256,13 @@ void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 
 void ADT_BaseCharacter::ActivateCollision(const FDamagePacket& DamagePacket)
 {
+	AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
 	CombatComp->CollisionStart(DamagePacket);
 }
 
 void ADT_BaseCharacter::DeactivateCollision()
 {
+	AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPose);
 	CombatComp->CollisionEnd();
 }
 
@@ -323,4 +324,22 @@ void ADT_BaseCharacter::SimProxiesTurn()
 		return;
 	}
 	TurnInPlace = ETurnInPlace::ETIP_NotTurn;
+}
+
+void ADT_BaseCharacter::AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption)
+{
+	if (HasAuthority())
+		MulticastRPCAnimTickOption(AnimTickOption);
+	else if (IsLocallyControlled())
+		ServerRPCAnimTickOption(AnimTickOption);
+}
+
+void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
+{
+	MulticastRPCAnimTickOption(AnimTickOption);
+}
+
+void ADT_BaseCharacter::MulticastRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
+{
+	GetMesh()->VisibilityBasedAnimTickOption = AnimTickOption;
 }

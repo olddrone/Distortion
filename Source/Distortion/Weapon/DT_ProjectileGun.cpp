@@ -6,7 +6,11 @@
 #include "ObjectPool/DT_PoolSubSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
-void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket)
+ADT_ProjectileGun::ADT_ProjectileGun()
+{
+}
+
+void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
 {
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(GetMeshComp());
@@ -15,12 +19,12 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket)
 	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Mesh);
-		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+		FVector ToTarget = TraceHitTarget - SocketTransform.GetLocation();
 		FRotator TargetRotation = ToTarget.Rotation();
 
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnedActor);
-		
+
 	}
 }

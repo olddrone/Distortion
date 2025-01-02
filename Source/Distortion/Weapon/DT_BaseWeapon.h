@@ -16,7 +16,7 @@ class DISTORTION_API ADT_BaseWeapon : public AActor, public IDT_MeshInterface
 public:
 	ADT_BaseWeapon();
 
-	virtual void Attack(const FDamagePacket& DamagePacket) PURE_VIRTUAL(ADT_BaseWeapon::Attack, );
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) PURE_VIRTUAL(ADT_BaseWeapon::Attack, );
 	virtual void AttackEnd() {}
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
 
