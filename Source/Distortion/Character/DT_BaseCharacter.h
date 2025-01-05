@@ -24,8 +24,10 @@ class DISTORTION_API ADT_BaseCharacter : public ACharacter,
 public:
 	ADT_BaseCharacter();
 
-	virtual void Tick(float DeltaTime) override;
+	virtual void PossessedBy(AController* NewController) override;
 
+	virtual void Tick(float DeltaTime) override;
+	virtual void OnRep_PlayerState() override;
 	virtual void OnRep_ReplicatedMovement() override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }
@@ -92,7 +94,7 @@ protected:
 	ETurnInPlace TurnInPlace = ETurnInPlace::ETIP_NotTurn;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	TObjectPtr<UDT_AttributeComponent> AttributeComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")

@@ -20,7 +20,12 @@ class DISTORTION_API UDT_AttributeComponent : public UActorComponent
 public:
 	UDT_AttributeComponent();
 	float ApplyDamage(const float Damage);
-	FORCEINLINE float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth() const { return Attributes.MaxHealth; }
 
 protected:
 	virtual void BeginPlay() override;

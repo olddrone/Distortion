@@ -53,4 +53,6 @@ private:
 	TObjectPtr<class UParticleSystemComponent> TraceComponent;
 
 	FTimerHandle Handle;
+
+	FVector StartLocation = FVector::ZeroVector;
 };

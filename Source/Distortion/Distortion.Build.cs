@@ -19,6 +19,8 @@ public class Distortion : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
             "Niagara",
+            "UMG",
+            "ModelViewViewModel",
         });
     }
 }

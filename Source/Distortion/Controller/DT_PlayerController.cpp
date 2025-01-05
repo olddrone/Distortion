@@ -8,6 +8,7 @@
 
 ADT_PlayerController::ADT_PlayerController()
 {
+	bReplicates = true;
 }
 
 void ADT_PlayerController::BeginPlay()

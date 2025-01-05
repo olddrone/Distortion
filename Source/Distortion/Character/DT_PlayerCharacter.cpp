@@ -34,6 +34,7 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
 }
 
 void ADT_PlayerCharacter::Tick(float DeltaTime)

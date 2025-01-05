@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "Data/DT_DamageData.h"
 #include "Interface/DT_MeshInterface.h"
-#include "Interface/DT_CombatInterface.h"
 #include "DT_CollisionManager.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -24,9 +23,8 @@ public:
 	void SetActorsToIgnore(AActor* Actor) { ActorsToIgnore.Add(Actor); }
 
 	void DoDamage(const FHitResult& Victim);
-
-	// UFUNCTION(Server, Unreliable)
-	// void ServerRPCDoDamage(const FHitResult& Victim);
+	/*UFUNCTION(Server, Unreliable)
+	void ServerRPCDoDamage(const FHitResult& Victim);*/
 
 	void DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation,
 		TArray<FHitResult>& HitResults, const FColor& Color);

@@ -1,9 +1,9 @@
 
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DT_CollisionManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interface/DT_CombatInterface.h"
 
 UDT_CollisionManager::UDT_CollisionManager()
 {
@@ -53,7 +53,6 @@ void UDT_CollisionManager::TraceCheck()
 		{
 			HitActors.Emplace(HitResult.GetActor());
 			DoDamage(HitResult);
-			// ServerRPCDoDamage(HitResult);
 		}
 	}
 
@@ -72,6 +71,7 @@ void UDT_CollisionManager::DoDamage(const FHitResult& Victim)
 	if (VictimInterface)
 		VictimInterface->GetHit(InstigatorLocation, 10);
 }
+
 
 void UDT_CollisionManager::DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation, TArray<FHitResult>& HitResults, const FColor& Color)
 {

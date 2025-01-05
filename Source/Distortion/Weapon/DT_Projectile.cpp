@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
+#include "Interface/DT_CombatInterface.h"
 
 ADT_Projectile::ADT_Projectile()
 {
@@ -24,6 +25,7 @@ ADT_Projectile::ADT_Projectile()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->bSimulationEnabled = false;
+
 }
 
 void ADT_Projectile::BeginPlay()
@@ -35,7 +37,7 @@ void ADT_Projectile::BeginPlay()
 void ADT_Projectile::OnSpawnFromPool(const FVector_NetQuantize& Location, const FRotator& Rotation)
 {
 	SetActorEnableCollision(true);
-
+	
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	FVector Direction = GetActorForwardVector().GetSafeNormal();
 	ProjectileMovementComponent->Velocity = Direction * ProjectileSpeed;
@@ -44,6 +46,8 @@ void ADT_Projectile::OnSpawnFromPool(const FVector_NetQuantize& Location, const 
 	ProjectileMovementComponent->bSimulationEnabled = true;
 	ProjectileMovementComponent->UpdateComponentVelocity();
 	ProjectileMovementComponent->Activate();
+
+	StartLocation = Location;
 
 	ShowTrace();
 
@@ -68,6 +72,7 @@ void ADT_Projectile::OnReturnToPool()
 	ProjectileMovementComponent->UpdateComponentVelocity();
 	ProjectileMovementComponent->Deactivate();
 
+	StartLocation = FVector::ZeroVector;
 }
 
 void ADT_Projectile::ShowTrace()
@@ -92,8 +97,10 @@ void ADT_Projectile::MulitcastRPCShowTrace_Implementation()
 void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("This : %s, HitActor : %s"), *GetName(), *OtherActor->GetName());
-	
+	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
+	if (VictimInterface)
+		VictimInterface->GetHit(StartLocation, 10);
+
 	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 	PoolSubSystem->ReturnToPool(this);
 }

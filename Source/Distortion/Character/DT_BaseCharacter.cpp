@@ -8,6 +8,8 @@
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerState/DT_PlayerState.h"
+#include "UI/HUD/DT_HUD.h"
 
 ADT_BaseCharacter::ADT_BaseCharacter()
 {
@@ -23,15 +25,31 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
 
-	AttributeComp = CreateDefaultSubobject<UDT_AttributeComponent>(TEXT("AttributeComponent"));
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
 	
+}
+
+void ADT_BaseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController); 
+
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		if (IsLocallyControlled())
+		{
+			const APlayerController* PlayerController = GetController<APlayerController>();
+			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
+				Hud->InitOverlay(State, AttributeComp);
+		}
+	}
 }
 
 void ADT_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void ADT_BaseCharacter::Tick(float DeltaTime)
@@ -45,6 +63,23 @@ void ADT_BaseCharacter::Tick(float DeltaTime)
 		TimeSinceLastMovementReplication += DeltaTime;
 		if (TimeSinceLastMovementReplication > 0.25f)
 			OnRep_ReplicatedMovement();
+	}
+}
+
+void ADT_BaseCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		if (IsLocallyControlled())
+		{
+			const APlayerController* PlayerController = GetController<APlayerController>();
+			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
+				Hud->InitOverlay(State, AttributeComp);
+		}
 	}
 }
 
@@ -269,7 +304,10 @@ void ADT_BaseCharacter::DeactivateCollision()
 void ADT_BaseCharacter::GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount)
 {
 	if (HasAuthority())
+	{
+		AttributeComp->ApplyDamage(DamageAmount);
 		ClientRPCGetHit(InstigatorLocation, DamageAmount);
+	}
 }
 
 // 해당 클라에서만 실행
@@ -281,8 +319,7 @@ void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize
 		FVector ToInstigator = (InstigatorLocation - GetActorLocation()).GetSafeNormal();
 		float Theta = UDT_CustomLibrary::CalculateTheta(Forward, ToInstigator);
 		FName Section = UDT_CustomLibrary::CheckSectionName_4Direction(Theta);
-
-		AttributeComp->ApplyDamage(DamageAmount);
+		UE_LOG(LogTemp, Warning, TEXT("%f"), Theta);
 		Hit(Section);
 	}
 }
