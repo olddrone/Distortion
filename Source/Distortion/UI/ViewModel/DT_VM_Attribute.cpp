@@ -9,12 +9,6 @@ void UDT_VM_Attribute::Init(APlayerController* InPlayerController,
 {
 	Attributes = Cast<UDT_AttributeComponent>(InAttributes);
 	BindCallbacks();
-	NotifyInit();
-}
-
-void UDT_VM_Attribute::NotifyInit()
-{
-	ReceiveInit();
 }
 
 void UDT_VM_Attribute::BindCallbacks()
@@ -22,9 +16,12 @@ void UDT_VM_Attribute::BindCallbacks()
     if (!ensure(Attributes))
         return;
 
-	SetHealth(Attributes->GetHealth());
 	SetMaxHealth(Attributes->GetMaxHealth());
+	SetHealth(Attributes->GetHealth());
 	Attributes->HealthChange.AddUObject(this, &UDT_VM_Attribute::OnHealthChanged);
+
+	SetMaxStamina(Attributes->GetMaxStamina());
+	SetStamina(Attributes->GetStamina());
 }
 
 void UDT_VM_Attribute::OnHealthChanged(float NewHealth)

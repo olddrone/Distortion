@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAnimMontage> EquipMontage;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UAnimMontage> GuardMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType WeaponType;
 
@@ -32,4 +35,5 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FName HolsterSocketName;
+
 };

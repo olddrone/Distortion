@@ -24,6 +24,7 @@ public:
 	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_CollisionManager* InCollisionManager) override;
 
 	virtual void SetFXVisibility(const bool bVisible)  override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -33,4 +34,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> TrailEffect;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	float Damage;
 };

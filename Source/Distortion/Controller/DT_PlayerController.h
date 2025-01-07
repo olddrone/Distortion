@@ -11,7 +11,7 @@
 struct FInputActionValue;
 
 DECLARE_DELEGATE(FEquipDelegate);
-DECLARE_DELEGATE(FLMBDelegate);
+DECLARE_DELEGATE_OneParam(FLMBDelegate, bool);
 DECLARE_DELEGATE_OneParam(FRMBDelegate, bool);
 DECLARE_DELEGATE(FDodgeDelegate);
 
@@ -44,7 +44,8 @@ private:
 	void RMBStart();
 	void RMBEnd();
 
-	void LMB();
+	void LMBStart();
+	void LMBEnd();
 
 	void Equip();
 

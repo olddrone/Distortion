@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Data/DT_DamageData.h"
+#include "Data/DT_Crosshairs.h"
 #include "Interface/DT_MeshInterface.h"
 #include "DT_BaseWeapon.generated.h"
 
@@ -25,6 +26,8 @@ public:
 	virtual UMeshComponent* GetMeshComp() const override { return MeshComponent; }
 	virtual FVector GetSocketLocation(const FName& SocketName) const override;
 	virtual void SetFXVisibility(const bool bVisible)  PURE_VIRTUAL(ADT_BaseWeapon::SetFXVisibility, );
+
+	virtual FCrosshairsTextures GetCrosshairs() const { return FCrosshairsTextures(nullptr); }
 
 protected:
 	virtual void BeginPlay() override;

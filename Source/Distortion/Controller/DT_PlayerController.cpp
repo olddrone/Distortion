@@ -39,7 +39,8 @@ void ADT_PlayerController::SetupInputComponent()
 	EIC->BindAction(InputData->RMBAction, ETriggerEvent::Started, this, &ADT_PlayerController::RMBStart);
 	EIC->BindAction(InputData->RMBAction, ETriggerEvent::Completed, this, &ADT_PlayerController::RMBEnd);
 
-	EIC->BindAction(InputData->LMBAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::LMB);
+	EIC->BindAction(InputData->LMBAction, ETriggerEvent::Started, this, &ADT_PlayerController::LMBStart);
+	EIC->BindAction(InputData->LMBAction, ETriggerEvent::Completed, this, &ADT_PlayerController::LMBEnd);
 
 	EIC->BindAction(InputData->EquipAction, ETriggerEvent::Started, this, &ADT_PlayerController::Equip);
 }
@@ -96,13 +97,16 @@ void ADT_PlayerController::RMBEnd()
 		RMBDelegate.Execute(false);
 }
 
-void ADT_PlayerController::LMB()
+void ADT_PlayerController::LMBStart()
 {
 	if (LMBDelegate.IsBound())
-		LMBDelegate.Execute();
+		LMBDelegate.Execute(true);
+}
 
-	if (StateInterface)
-		StateInterface->SetLMBDown(true);
+void ADT_PlayerController::LMBEnd()
+{
+	if (LMBDelegate.IsBound())
+		LMBDelegate.Execute(false);
 }
 
 void ADT_PlayerController::Equip()

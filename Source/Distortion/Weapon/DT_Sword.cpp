@@ -34,7 +34,9 @@ void ADT_Sword::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuant
 {
 	if (IsValid(CollisionManager))
 	{
-		CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
+		CollisionManager->SetDamagePacket(DamagePacket);
+		// CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
+		CollisionManager->SetDamage(Damage);
 		CollisionManager->DoCollision(this);
 	}
 }
@@ -42,8 +44,9 @@ void ADT_Sword::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuant
 void ADT_Sword::AttackEnd()
 {
 	if (IsValid(CollisionManager))
+	{
 		CollisionManager->StopCollision();
-
+	}
 }
 
 void ADT_Sword::Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_CollisionManager* InCollisionManager)

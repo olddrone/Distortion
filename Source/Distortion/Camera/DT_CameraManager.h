@@ -21,4 +21,20 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	float CrouchBlendDuration = .5f;
 
+	float CrouchBlendTime;
+
+
+public:
+	void SetZoomState(bool bInZoom) { bIsZooming = bInZoom; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	float ZoomedFOV = 45.0f;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed = 20.0f;
+
+	float TestFOV;
+
+	bool bIsZooming = false; 
 };

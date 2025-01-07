@@ -13,11 +13,9 @@ class DISTORTION_API ADT_Projectile : public AActor, public IDT_ObjectPooledInte
 	GENERATED_BODY()
 public:	
 	ADT_Projectile();
-	// virtual void Tick(float DeltaTime) override;
 
 	virtual void OnSpawnFromPool(const FVector_NetQuantize& Location, const FRotator& Rotation) override;
 	virtual void OnReturnToPool() override;
-
 
 	UFUNCTION()
 	void ShowTrace();
@@ -44,7 +42,7 @@ private:
 	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	float ProjectileSpeed = 3500.0f;
+	float ProjectileSpeed = 15000.0f;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UParticleSystem> TraceParticle;
@@ -55,4 +53,8 @@ private:
 	FTimerHandle Handle;
 
 	FVector StartLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 10.f;
+
 };

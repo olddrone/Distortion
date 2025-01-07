@@ -21,6 +21,7 @@ class DISTORTION_API UDT_CombatComponent : public UActorComponent
 
 public:	
 	UDT_CombatComponent();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void Attack(const FName& Section = "Attack01") { ServerRPCAttack(Section); }
@@ -55,6 +56,7 @@ public:
 	void MulticastRPCHit(const FName& Section);
 
 	void CreateWeapon(UDataAsset* DataAsset);
+
 	void EquipCheck() { (bEquipWeapon) ? Equip(false, "Unequip") : Equip(true, "Equip"); }
 
 	UFUNCTION()
@@ -84,6 +86,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void SetHUDCrosshairs(float DeltaTime);
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -101,19 +104,39 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ADT_BaseWeapon> Weapon;
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDA_Weapon> WeaponData;
 
 	IDT_CombatInterface* CombatInterface;
 	IDT_MeshInterface* MeshInterface;
 	IDT_StateInterface* StateInterface;
 
-	const int8 BaseDamage = 10;
+	const float BaseDamage = 10;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bEquipWeapon = false;
 
 	UPROPERTY()
 	TObjectPtr<UDT_CollisionManager> CollisionManager;
+
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
+	float CrosshairZoom;
+public:
+	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }
+	
+	FTimerHandle TimerHandle;
+	void StartFireTimer(const FDamagePacket InDamagePacket);
+	void FireTimerFinished(const FDamagePacket InDamagePacket);
+
+public:
+	UFUNCTION()
+	void Guard(const FName& SectionName = "Default") { ServerRPCGuard(SectionName); }
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCGuard(const FName& Section);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCGuard(const FName& Section);
 
 };

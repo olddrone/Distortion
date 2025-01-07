@@ -24,10 +24,7 @@ class DISTORTION_API ADT_BaseCharacter : public ACharacter,
 public:
 	ADT_BaseCharacter();
 
-	virtual void PossessedBy(AController* NewController) override;
-
 	virtual void Tick(float DeltaTime) override;
-	virtual void OnRep_PlayerState() override;
 	virtual void OnRep_ReplicatedMovement() override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }
@@ -37,7 +34,6 @@ public:
 	virtual EWeaponType GetEquipWeaponType() const override { return EquipWeaponType; }
 
 	virtual bool GetLMBDown() const override { return bLMBDown; }
-	virtual void SetLMBDown(const bool& bDown) override { bLMBDown = bDown; }
 	virtual bool GetRMBDown() const override { return bRMBDown; }
 
 	virtual float GetAimOffsetYaw() const override { return AimOffsetYaw; }
@@ -47,7 +43,7 @@ public:
 	virtual bool ShouldRotateRootBone() const override { return bRotateRootBone; }
 
 protected:
-	virtual void BeginPlay() override;
+	// virtual void BeginPlay() override;
 	void AimOffset(const float& DeltaTime);
 	void CheckTurnInPlace(const float& DeltaTime);
 
@@ -59,7 +55,10 @@ protected:
 
 public:
 	UFUNCTION()
-	void RMB(bool bHoldRotationYaw);
+	virtual void LMB(bool bIsAttack);
+	
+	UFUNCTION()
+	virtual void RMB(bool bHoldRotationYaw);
 
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCRMBDown(bool bHoldRotationYaw);
@@ -97,7 +96,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	TObjectPtr<UDT_AttributeComponent> AttributeComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	TObjectPtr<UDT_CombatComponent> CombatComp;
 
 public:
@@ -128,10 +127,12 @@ public:
 	virtual void DeactivateCollision() override;
 
 public:
-	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount) override;
+	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount,
+		const FDamagePacket& DamagePacket) override;
 
 	UFUNCTION(Client, Unreliable)
-	void ClientRPCGetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount);
+	void ClientRPCGetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount,
+		const FDamagePacket& DamagePacket);
 
 	virtual void Interaction(UDataAsset* DataAsset) override;
 	virtual void ToAttachSocket(const FName& SocketName) override;
@@ -155,5 +156,9 @@ private:
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
 
+public:
+
+
+	void Guard(const FName& SectionName);
 
 };

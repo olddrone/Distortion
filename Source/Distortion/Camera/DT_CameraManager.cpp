@@ -7,7 +7,6 @@
 
 void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 {
-	static float CrouchBlendTime;
 	Super::UpdateViewTarget(OutVT, DeltaTime);
 
 	if (ACharacter* Character = Cast<ACharacter>(GetOwningPlayerController()->GetPawn()))
@@ -26,5 +25,10 @@ void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 
 		if (MoveComp->IsMovingOnGround())
 			OutVT.POV.Location += Offset;
+
+		///
+		const float ChangeFOV = (bIsZooming) ? ZoomedFOV : DefaultFOV;
+		TestFOV = FMath::FInterpTo(TestFOV, ChangeFOV, DeltaTime, ZoomInterpSpeed);
+		SetFOV(TestFOV);
 	}
 }

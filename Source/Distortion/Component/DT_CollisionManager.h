@@ -23,19 +23,18 @@ public:
 	void SetActorsToIgnore(AActor* Actor) { ActorsToIgnore.Add(Actor); }
 
 	void DoDamage(const FHitResult& Victim);
-	/*UFUNCTION(Server, Unreliable)
-	void ServerRPCDoDamage(const FHitResult& Victim);*/
 
 	void DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation,
 		TArray<FHitResult>& HitResults, const FColor& Color);
 
 public:
+	FORCEINLINE void SetDamagePacket(const FDamagePacket& InPacket) { DamagePacket = InPacket; }
 	FORCEINLINE void SetCharacter(AActor* InCharacter) { Character = InCharacter; }
-	FORCEINLINE void SetSocketName(const FName& InStartSocketName, const FName& InEndSocketName) { StartSocketName = InStartSocketName; EndSocketName = InEndSocketName; }
+	FORCEINLINE void SetDamage(const float InDamage) { Damage = InDamage; }
+//	FORCEINLINE void SetSocketName(const FName& InStartSocketName, const FName& InEndSocketName) { StartSocketName = InStartSocketName; EndSocketName = InEndSocketName; }
 
 protected:
 	virtual void BeginPlay() override;
-
 
 private:
 	UPROPERTY()
@@ -44,13 +43,14 @@ private:
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
 	FTimerHandle Handle;
 	float InRate = 0.034f;		// 1frame == 0.017f
-	FDamagePacket DamageInfo;
+	FDamagePacket DamagePacket;
 	UPROPERTY()
 	TArray<FVector_NetQuantize> PresentPoints;
 	TArray<FVector_NetQuantize> BeforePoints;
-	FName StartSocketName, EndSocketName;
 
 	AActor* Character;
 	// TScriptInterface<class ILT_MeshInterface> MeshInterface;
 	IDT_MeshInterface* MeshInterface;
+
+	float Damage = 10.f;
 };

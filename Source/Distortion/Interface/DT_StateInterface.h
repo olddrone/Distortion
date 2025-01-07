@@ -26,7 +26,5 @@ public:
 	virtual EWeaponType GetEquipWeaponType() const = 0;
 
 	virtual bool GetLMBDown() const = 0;
-	virtual void SetLMBDown(const bool& bDown) = 0;
-
 	virtual bool GetRMBDown() const = 0;
 };

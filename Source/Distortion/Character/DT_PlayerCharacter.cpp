@@ -7,19 +7,13 @@
 #include "Controller/DT_PlayerController.h"
 #include "DrawDebugHelpers.h"
 
-#include "Components/CapsuleComponent.h"
+#include "PlayerState/DT_PlayerState.h"
+#include "UI/HUD/DT_HUD.h"
+#include "Camera/DT_CameraManager.h"
 
 ADT_PlayerCharacter::ADT_PlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.0f, 0.f));
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->SetupAttachment(GetRootComponent());
@@ -29,12 +23,24 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+	
 }
 
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		if (IsLocallyControlled())
+		{
+			const APlayerController* PlayerController = GetController<APlayerController>();
+			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
+				Hud->InitOverlay(State, AttributeComp);
+		}
+	}
 }
 
 void ADT_PlayerCharacter::Tick(float DeltaTime)
@@ -59,6 +65,36 @@ void ADT_PlayerCharacter::Tick(float DeltaTime)
 	DrawDebugDirectionalArrow(GetWorld(), Start, Start + ViewDirection * 100.f, 5.f, FColor::Orange, false, -1.f, 0, 2.f);
 }
 
+void ADT_PlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		if (IsLocallyControlled())
+		{
+			const APlayerController* PlayerController = GetController<APlayerController>();
+			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
+				Hud->InitOverlay(State, AttributeComp);
+		}
+	}
+}
+
+void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
+{
+	Super::RMB(bHoldRotationYaw);
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController && GetEquipWeaponType() == EWeaponType::EWT_Gun)
+	{
+		ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerController->PlayerCameraManager);
+		if (CameraManager)
+			CameraManager->SetZoomState(bRMBDown);
+	}
+}
+
 void ADT_PlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -67,8 +103,8 @@ void ADT_PlayerCharacter::BeginPlay()
 	if (IsValid(controller))
 	{
 		controller->DodgeDelegate.BindUObject(this, &ADT_BaseCharacter::Dodge);
-		controller->RMBDelegate.BindUObject(this, &ADT_BaseCharacter::RMB);
-		controller->LMBDelegate.BindUObject(this, &ADT_BaseCharacter::Attack);
+		controller->RMBDelegate.BindUObject(this, &ADT_PlayerCharacter::RMB);
+		controller->LMBDelegate.BindUObject(this, &ADT_BaseCharacter::LMB);
 		controller->EquipDelegate.BindUObject(this, &ADT_BaseCharacter::Equip);
 	}
 }

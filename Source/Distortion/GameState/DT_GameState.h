@@ -13,6 +13,8 @@ UCLASS()
 class DISTORTION_API ADT_GameState : public AGameState
 {
 	GENERATED_BODY()
+public:
+	ADT_GameState();
 
 protected:
 	virtual void BeginPlay() override;

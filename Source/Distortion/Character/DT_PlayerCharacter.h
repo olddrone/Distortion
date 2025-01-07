@@ -19,6 +19,11 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void OnRep_PlayerState() override;
+	
+	virtual void RMB(bool bHoldRotationYaw) override;
+
+
 protected:
 	virtual void BeginPlay() override;
 

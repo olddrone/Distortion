@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Interface/DT_CombatInterface.h"
+#include "Data/DT_DamageData.h"
 
 ADT_Projectile::ADT_Projectile()
 {
@@ -17,7 +18,7 @@ ADT_Projectile::ADT_Projectile()
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionBox);
-	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
@@ -97,9 +98,14 @@ void ADT_Projectile::MulitcastRPCShowTrace_Implementation()
 void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	///
+	FDamagePacket TestPacket;
+	TestPacket.AttackDirection = EAttackDirection::EAD_Shot;
+	TestPacket.AttackType = EAttackType::EAT_Bullet;
+	///
 	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
 	if (VictimInterface)
-		VictimInterface->GetHit(StartLocation, 10);
+		VictimInterface->GetHit(StartLocation, Damage, TestPacket);
 
 	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 	PoolSubSystem->ReturnToPool(this);

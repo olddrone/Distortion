@@ -4,8 +4,13 @@
 #include "ObjectPool/DT_PoolSubSystem.h"
 
 
+ADT_GameState::ADT_GameState()
+{
+}
+
 void ADT_GameState::BeginPlay()
 {
+
 	Super::BeginPlay();
 
 	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();

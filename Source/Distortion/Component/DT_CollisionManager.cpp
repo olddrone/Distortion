@@ -28,15 +28,15 @@ void UDT_CollisionManager::StopCollision()
 {
 	GetWorld()->GetTimerManager().ClearTimer(Handle);
 	HitActors.Empty();
-
+	DamagePacket = nullptr;
 	for (auto& BeforePoint : BeforePoints)
 		BeforePoint = FVector_NetQuantize::ZeroVector;
 }
 
 void UDT_CollisionManager::TraceCheck()
 {
-	PresentPoints[0] = MeshInterface->GetSocketLocation(StartSocketName);
-	PresentPoints[3] = MeshInterface->GetSocketLocation(EndSocketName);
+	PresentPoints[0] = MeshInterface->GetSocketLocation(DamagePacket.StartSocketName);
+	PresentPoints[3] = MeshInterface->GetSocketLocation(DamagePacket.EndSocketName);
 	PresentPoints[1] = FMath::Lerp(PresentPoints[0], PresentPoints[3], 1.0f / 3.0f);
 	PresentPoints[2] = FMath::Lerp(PresentPoints[0], PresentPoints[3], 2.0f / 3.0f);
 
@@ -69,7 +69,7 @@ void UDT_CollisionManager::DoDamage(const FHitResult& Victim)
 
 	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(Victim.GetActor());
 	if (VictimInterface)
-		VictimInterface->GetHit(InstigatorLocation, 10);
+		VictimInterface->GetHit(InstigatorLocation, Damage, DamagePacket);
 }
 
 

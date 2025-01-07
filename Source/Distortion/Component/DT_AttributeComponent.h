@@ -9,6 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FDeadDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FHealthChangeDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FStaminaChangeDelegate, float);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -21,11 +22,11 @@ public:
 	UDT_AttributeComponent();
 	float ApplyDamage(const float Damage);
 
-	UFUNCTION(BlueprintCallable)
-	float GetHealth() const { return Health; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetStamina() const { return Attributes.Stamina; }
 
-	UFUNCTION(BlueprintCallable)
-	float GetMaxHealth() const { return Attributes.MaxHealth; }
+	FORCEINLINE float GetMaxHealth() const { return Attributes.MaxHealth; }
+	FORCEINLINE float GetMaxStamina() const { return Attributes.MaxStamina; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,6 +34,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void SetHealth(const float InHealth);
+	FORCEINLINE void SetStamina(const float InStamina) { Attributes.Stamina = FMath::Clamp<float>(InStamina, 0.0f, Attributes.MaxStamina); }
 
 	UFUNCTION()
 	void OnRep_Health();
@@ -40,6 +42,7 @@ protected:
 public:
 	FDeadDelegate Dead;
 	FHealthChangeDelegate HealthChange;
+	FStaminaChangeDelegate StaminaChange;
 
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_Health, Transient, VisibleInstanceOnly)

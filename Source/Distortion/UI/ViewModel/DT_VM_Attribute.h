@@ -19,17 +19,37 @@ class DISTORTION_API UDT_VM_Attribute : public UMVVMViewModelBase
 public:
 	void Init(APlayerController* InPlayerController, class ADT_PlayerState* InPlayerState, UDT_AttributeComponent* InAttributes);
    
+    UFUNCTION(BlueprintPure, FieldNotify)
+    float GetHealthPercent() const { return (MaxHealth != 0) ? Health / MaxHealth : 0; }
+
     float GetHealth() const { return Health; }
-    void SetHealth(float InHealth) { UE_MVVM_SET_PROPERTY_VALUE(Health, InHealth); }
+    void SetHealth(float InHealth) {
+        if (UE_MVVM_SET_PROPERTY_VALUE(Health, InHealth))
+            UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(GetHealthPercent);
+    }
 
     float GetMaxHealth() const { return MaxHealth; }
-    void SetMaxHealth(float InMaxHealth) { UE_MVVM_SET_PROPERTY_VALUE(MaxHealth, InMaxHealth); }
+    void SetMaxHealth(float InMaxHealth) {
+        if (UE_MVVM_SET_PROPERTY_VALUE(MaxHealth, InMaxHealth))
+            UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(GetHealthPercent);
+    }
+
+    UFUNCTION(BlueprintPure, FieldNotify)
+    float GetStaminaPercent() const { return (MaxStamina != 0) ? Stamina / MaxStamina : 0; }
+
+    float GetStamina() const { return Stamina; }
+    void SetStamina(float InStamina) {
+        if (UE_MVVM_SET_PROPERTY_VALUE(Stamina, InStamina))
+            UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(GetStaminaPercent);
+    }
+
+    float GetMaxStamina() const { return MaxStamina; }
+    void SetMaxStamina(float InMaxStamina) {
+        if (UE_MVVM_SET_PROPERTY_VALUE(MaxStamina, InMaxStamina))
+            UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(GetStaminaPercent);
+    }
 
 protected:
-    void NotifyInit();
-    UFUNCTION(BlueprintImplementableEvent)
-    void ReceiveInit();
-
     virtual void BindCallbacks();
 
     UFUNCTION()
@@ -45,4 +65,10 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, FieldNotify, Setter, Getter)
     float MaxHealth;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, FieldNotify, Setter, Getter)
+    float Stamina;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, FieldNotify, Setter, Getter)
+    float MaxStamina;
 };

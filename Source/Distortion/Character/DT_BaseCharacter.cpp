@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DT_BaseCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Component/DT_AttributeComponent.h"
 #include "Component/DT_CombatComponent.h"
 #include "Library/DT_CustomLibrary.h"
@@ -8,12 +9,19 @@
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "PlayerState/DT_PlayerState.h"
-#include "UI/HUD/DT_HUD.h"
 
 ADT_BaseCharacter::ADT_BaseCharacter()
 {
  	PrimaryActorTick.bCanEverTick = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+	
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.0f, 0.f));
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	// 이 둘은 항상 반대가 되어야 떨림이 없음
 	bUseControllerRotationYaw = false;
@@ -29,29 +37,6 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	
 }
 
-void ADT_BaseCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController); 
-
-	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
-	if (State)
-	{
-		AttributeComp = State->GetAttributes();
-		if (IsLocallyControlled())
-		{
-			const APlayerController* PlayerController = GetController<APlayerController>();
-			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
-				Hud->InitOverlay(State, AttributeComp);
-		}
-	}
-}
-
-void ADT_BaseCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
 void ADT_BaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -63,23 +48,6 @@ void ADT_BaseCharacter::Tick(float DeltaTime)
 		TimeSinceLastMovementReplication += DeltaTime;
 		if (TimeSinceLastMovementReplication > 0.25f)
 			OnRep_ReplicatedMovement();
-	}
-}
-
-void ADT_BaseCharacter::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-
-	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
-	if (State)
-	{
-		AttributeComp = State->GetAttributes();
-		if (IsLocallyControlled())
-		{
-			const APlayerController* PlayerController = GetController<APlayerController>();
-			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
-				Hud->InitOverlay(State, AttributeComp);
-		}
 	}
 }
 
@@ -158,6 +126,14 @@ void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionN
 	}
 }
 
+void ADT_BaseCharacter::LMB(bool bIsAttack)
+{
+	bLMBDown = bIsAttack;
+
+	if (bLMBDown)
+		Attack();
+}
+
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
 	bRMBDown = bHoldRotationYaw;
@@ -166,6 +142,8 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
 
+	const float Value = (bRMBDown) ? 0.58f : 0.f;
+	CombatComp->SetAimFactor(Value);
 	GetCharacterMovement()->MaxWalkSpeed = (bRMBDown) ? WalkSpeed::Walk : WalkSpeed::Run;
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		SetRotationYaw(bHoldRotationYaw);
@@ -273,7 +251,12 @@ void ADT_BaseCharacter::Equip()
 
 void ADT_BaseCharacter::Attack()
 {
-	FName SectionName = (GetEquipWeaponType() == EWeaponType::EWT_Gun) ? "Hip" :"Attack01";
+	FName SectionName; 
+	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
+		SectionName = "Attack01";
+	else
+		SectionName = (bRMBDown)? "Ironsight": "Hip";
+
 	DoAttack(SectionName);
 }
 
@@ -301,17 +284,18 @@ void ADT_BaseCharacter::DeactivateCollision()
 	CombatComp->CollisionEnd();
 }
 
-void ADT_BaseCharacter::GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount)
+void ADT_BaseCharacter::GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount, const FDamagePacket& DamagePacket)
 {
 	if (HasAuthority())
 	{
 		AttributeComp->ApplyDamage(DamageAmount);
-		ClientRPCGetHit(InstigatorLocation, DamageAmount);
+		ClientRPCGetHit(InstigatorLocation, DamageAmount, DamagePacket);
 	}
 }
 
 // 해당 클라에서만 실행
-void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount)
+void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize& InstigatorLocation, 
+	const int8& DamageAmount, const FDamagePacket& DamagePacket)
 {
 	if (IsLocallyControlled())
 	{
@@ -319,8 +303,26 @@ void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize
 		FVector ToInstigator = (InstigatorLocation - GetActorLocation()).GetSafeNormal();
 		float Theta = UDT_CustomLibrary::CalculateTheta(Forward, ToInstigator);
 		FName Section = UDT_CustomLibrary::CheckSectionName_4Direction(Theta);
-		UE_LOG(LogTemp, Warning, TEXT("%f"), Theta);
-		Hit(Section);
+
+
+		// 여기서 가드 체크
+		if (bRMBDown && GetEquipWeaponType() == EWeaponType::EWT_Sword && Section != "Bwd")
+		{
+			FName Text = "Default";
+			EAttackDirection Direction = DamagePacket.AttackDirection;
+			if ((Section == "Fwd" && Direction == EAttackDirection::EAD_Right) ||
+				(Section == "RT" && Direction != EAttackDirection::EAD_Left))
+				Text = "RT";
+			else if ((Section == "Fwd" && Direction == EAttackDirection::EAD_Left) ||
+				(Section == "LT" && Direction != EAttackDirection::EAD_Right))
+				Text = "LT";
+
+			Guard(Text);
+		}
+		else
+		{
+			Hit(Section);
+		}
 	}
 }
 
@@ -369,6 +371,12 @@ void ADT_BaseCharacter::AnimTickOption(const EVisibilityBasedAnimTickOption& Ani
 		MulticastRPCAnimTickOption(AnimTickOption);
 	else if (IsLocallyControlled())
 		ServerRPCAnimTickOption(AnimTickOption);
+}
+
+void ADT_BaseCharacter::Guard(const FName& SectionName)
+{
+	SetActionState(EActionState::EAS_Guard);
+	CombatComp->Guard(SectionName);
 }
 
 void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)

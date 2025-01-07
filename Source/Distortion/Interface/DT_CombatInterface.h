@@ -23,5 +23,6 @@ public:
 	virtual void ActivateCollision(const struct FDamagePacket& DamagePacket) = 0;
 	virtual void DeactivateCollision() = 0;
 
-	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount) = 0;
+	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount,
+		const FDamagePacket& DamagePacket) = 0;
 };

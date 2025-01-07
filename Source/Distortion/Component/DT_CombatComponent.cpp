@@ -5,10 +5,20 @@
 #include "Weapon/DT_BaseWeapon.h"
 #include "Library/DT_CustomLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Data/DT_Crosshairs.h"
+
+#include "UI/HUD/DT_HUD.h"
+
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "TimerManager.h"
+#include "Interface/DT_GunInterface.h"
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> BaseAttackRef(
@@ -29,16 +39,61 @@ UDT_CombatComponent::UDT_CombatComponent()
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
+void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (GetEquipWeapon())
+		SetHUDCrosshairs(DeltaTime);
+}
+
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CombatInterface = Cast<IDT_CombatInterface>(GetOwner());
-	MeshInterface = Cast<IDT_MeshInterface>(GetOwner());
-	StateInterface = Cast<IDT_StateInterface>(GetOwner());
+	AActor* Owner = GetOwner();
+	if (IsValid(Owner))
+	{
+		CombatInterface = Cast<IDT_CombatInterface>(Owner);
+		MeshInterface = Cast<IDT_MeshInterface>(Owner);
+		StateInterface = Cast<IDT_StateInterface>(Owner);
 
-	CollisionManager->SetCharacter(GetOwner());
-	CollisionManager->SetActorsToIgnore(GetOwner());
+		CollisionManager->SetCharacter(Owner);
+		CollisionManager->SetActorsToIgnore(Owner);
+	}
+}
+
+void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	APlayerController* Controller = Cast<APlayerController>(Character->GetController());
+	
+	if (Controller)
+	{
+		ADT_HUD* Hud = Cast< ADT_HUD>(Controller->GetHUD());
+		if (Hud)
+		{
+			FCrosshairsTextures Textures;
+
+
+			Textures = Weapon->GetCrosshairs();
+			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
+			FVector2D VelocityMultiplierRange(0, 1);
+
+			const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
+
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
+			CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
+
+			CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
+			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
+
+			Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+
+			Hud->SetHUDPackage(Textures);
+
+		}
+	}
 }
 
 UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
@@ -127,13 +182,16 @@ void UDT_CombatComponent::MulticastRPCAttachSocket_Implementation(const FName& S
 	Weapon->AttachMeshToSocket(MeshInterface->GetMeshComp(), SocketName);
 }
 
-void UDT_CombatComponent::CollisionStart(const FDamagePacket& DamagePacket)
+void UDT_CombatComponent::CollisionStart(const FDamagePacket& InDamagePacket)
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
-		ServerRPCCollisionStart(DamagePacket, HitResult.ImpactPoint);
+		ServerRPCCollisionStart(InDamagePacket, HitResult.ImpactPoint);
+		CrosshairShootingFactor = .75f;
+		if (GetEquipWeapon() && StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
+			StartFireTimer(InDamagePacket);
 	}
 }
 
@@ -146,7 +204,9 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 	}
 	else
 	{
-		CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
+		CollisionManager->SetDamagePacket(DamagePacket);
+		// CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
+		CollisionManager->SetDamage(BaseDamage);
 		CollisionManager->DoCollision(GetOwner());
 	}
 }
@@ -154,7 +214,9 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 void UDT_CombatComponent::CollisionEnd()
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
+	{
 		ServerRPCCollisionEnd();
+	}
 }
 
 void UDT_CombatComponent::MulticastRPCShowCosmetic_Implementation(const bool bIsShow)
@@ -178,12 +240,31 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		FVector Start = CrosshairWorldPosition;
+		
+		float DistanceToCharacter = (GetOwner()->GetActorLocation() - Start).Size();
+		Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
 		FVector End = Start + CrosshairWorldDirection * 80000;
+
 		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);  
 		if (!TraceHitResult.bBlockingHit)
 			TraceHitResult.ImpactPoint = End;
 	}
 }
+
+void UDT_CombatComponent::StartFireTimer(const FDamagePacket DamagePacket)
+{
+	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
+	FTimerDelegate RespawnDelegate = FTimerDelegate::CreateUObject(this, &UDT_CombatComponent::FireTimerFinished, DamagePacket);
+
+	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandle, RespawnDelegate, Interface->GetAutoFireDelay(), false);
+}
+
+void UDT_CombatComponent::FireTimerFinished(const FDamagePacket DamagePacket)
+{
+	if (StateInterface->GetLMBDown())
+		CollisionStart(DamagePacket);
+}
+
 
 void UDT_CombatComponent::ServerRPCCollisionEnd_Implementation()
 {
@@ -194,4 +275,14 @@ void UDT_CombatComponent::ServerRPCCollisionEnd_Implementation()
 	}
 	else
 		CollisionManager->StopCollision();
+}
+
+void UDT_CombatComponent::ServerRPCGuard_Implementation(const FName& Section)
+{
+	MulticastRPCGuard(Section);
+}
+
+void UDT_CombatComponent::MulticastRPCGuard_Implementation(const FName& Section)
+{
+	CombatInterface->PlayMontage(WeaponData->GuardMontage, Section);
 }

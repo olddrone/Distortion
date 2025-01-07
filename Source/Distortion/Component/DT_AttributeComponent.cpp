@@ -9,6 +9,7 @@ UDT_AttributeComponent::UDT_AttributeComponent()
 	SetIsReplicatedByDefault(true);
 
 	SetHealth(Attributes.MaxHealth);
+	SetStamina(Attributes.MaxHealth);
 }
 
 void UDT_AttributeComponent::BeginPlay()
