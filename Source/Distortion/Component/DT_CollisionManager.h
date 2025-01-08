@@ -22,20 +22,32 @@ public:
 
 	void SetActorsToIgnore(AActor* Actor) { ActorsToIgnore.Add(Actor); }
 
-	void DoDamage(const FHitResult& Victim);
-
-	void DoSphereTrace(const FVector& StartLocation, const FVector& EndLocation,
+	void DoLineTrace(const FVector& StartLocation, const FVector& EndLocation,
 		TArray<FHitResult>& HitResults, const FColor& Color);
+	
+	void DoSphereTrace(const FVector& Location, TArray<FHitResult>& HitResults, const FColor& Color);
 
 public:
 	FORCEINLINE void SetDamagePacket(const FDamagePacket& InPacket) { DamagePacket = InPacket; }
 	FORCEINLINE void SetCharacter(AActor* InCharacter) { Character = InCharacter; }
 	FORCEINLINE void SetDamage(const float InDamage) { Damage = InDamage; }
-//	FORCEINLINE void SetSocketName(const FName& InStartSocketName, const FName& InEndSocketName) { StartSocketName = InStartSocketName; EndSocketName = InEndSocketName; }
 
 protected:
 	virtual void BeginPlay() override;
 
+private:
+	void HandleHitResults(const TArray<FHitResult>& HitResults);
+
+	void DoDamage(const FHitResult& Victim);
+
+	FVector BezierCurve(const FVector& P0, const FVector& P1, const FVector& P2, float Alpha) const;
+
+	void CalculateControlPoints(const FVector& PreStart, const FVector& CurStart, const FVector& PreEnd, const FVector& CurEnd,
+		TPair<FVector, FVector>& CtrlPos);
+
+	void PerformInterpolatedTraces(const FVector& PreStart, const FVector& CurStart,
+		const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPos,
+		TArray<FHitResult>& HitResults);
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> HitActors;
@@ -44,10 +56,9 @@ private:
 	FTimerHandle Handle;
 	float InRate = 0.034f;		// 1frame == 0.017f
 	FDamagePacket DamagePacket;
-	UPROPERTY()
-	TArray<FVector_NetQuantize> PresentPoints;
-	TArray<FVector_NetQuantize> BeforePoints;
 
+	TPair<FVector, FVector> BeforePoints = { FVector::ZeroVector,FVector::ZeroVector };
+	
 	AActor* Character;
 	// TScriptInterface<class ILT_MeshInterface> MeshInterface;
 	IDT_MeshInterface* MeshInterface;
