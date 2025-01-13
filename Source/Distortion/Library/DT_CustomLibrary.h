@@ -6,9 +6,6 @@
 #include "UObject/NoExportTypes.h"
 #include "DT_CustomLibrary.generated.h"
 
-#define EPSILON 0.0001f
-#define SPHERE_TRACE(SSocket, ESocket, Debug) UKismetSystemLibrary::SphereTraceSingle(GetWorld(), SSocket, ESocket, 15.f, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore, Debug, OutHit, true, FColor::Orange, FColor::Green, 0.5f);
-
 USTRUCT()
 struct FData
 {
@@ -25,5 +22,7 @@ public:
 	static float CalculateTheta(const FVector& A, const FVector& B);
 	static FName CheckSectionName_8Direction(const float& Theta);
 	static FName CheckSectionName_4Direction(const float& Theta);
-	
+	static FVector BezierCurve_Quadratic(const FVector& P0, const FVector& P1, const FVector& P2, float T);
+
+	static FName CheckSectionName_Guard(const FName& HitDirection, const uint8& AttackDirection);
 };

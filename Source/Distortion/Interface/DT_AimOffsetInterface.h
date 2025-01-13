@@ -16,9 +16,5 @@ class DISTORTION_API IDT_AimOffsetInterface
 {
 	GENERATED_BODY()
 public:
-	virtual float GetAimOffsetYaw() const = 0;
-
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const = 0;
-	virtual ETurnInPlace GetTurnInPlace() const = 0;
-	virtual bool ShouldRotateRootBone() const = 0;
 };

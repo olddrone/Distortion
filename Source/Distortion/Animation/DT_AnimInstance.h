@@ -7,7 +7,6 @@
 #include "Data/DT_StateSet.h"
 #include "Interface/DT_StateInterface.h"
 #include "Interface/DT_AimOffsetInterface.h"
-// #include "Interface/DT_MeshInterface.h"
 #include "DT_AnimInstance.generated.h"
 
 class ACharacter;
@@ -29,7 +28,7 @@ protected:
 	void SetAOPitch();
 	void SetLeftHandPosition();
 
-private:
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ACharacter> Character;
 
@@ -72,9 +71,16 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FTransform LeftHandTransform;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, Category = "Aim Offset")
 	ETurnInPlace TurnInPlace;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	uint8 bRotateRootBone : 1;
+
+private:
+	FRotator StartingAimRotation;
+	float InterpAOYaw;
+
+	void SetAOYaw(const float& DeltaTime);
+	void CheckTurnInPlace(const float& DeltaTime);
 };

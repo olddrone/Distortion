@@ -31,13 +31,10 @@ void UDT_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 		MoveForward = FVector::DotProduct(Character->GetActorForwardVector(), Velocity);
 		MoveRight = FVector::DotProduct(Character->GetActorRightVector(), Velocity);
 		EquipWeaponType = StateInterface->GetEquipWeaponType();
-		TurnInPlace = AOInterface->GetTurnInPlace();
-
-		bRotateRootBone = AOInterface->ShouldRotateRootBone();
 
 		if (EquipWeaponType == EWeaponType::EWT_Gun)
 		{
-			AO_Yaw = AOInterface->GetAimOffsetYaw();
+			SetAOYaw(DeltaTime);
 			SetAOPitch();
 			SetLeftHandPosition();
 		}
@@ -60,3 +57,49 @@ void UDT_AnimInstance::SetLeftHandPosition()
 	LeftHandTransform.SetLocation(OutPosition);
 	LeftHandTransform.SetRotation(FQuat(OutRotation));
 }
+
+void UDT_AnimInstance::SetAOYaw(const float& DeltaTime)
+{
+	Character->bUseControllerRotationYaw = true;
+	CharacterMovement->bOrientRotationToMovement = false;
+	if (UKismetMathLibrary::VSizeXY(Velocity) == 0.f && !bIsFalling)
+	{
+		bRotateRootBone = true;
+		FRotator CurAimRotation = FRotator(0, Character->GetBaseAimRotation().Yaw, 0);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+
+		if (TurnInPlace == ETurnInPlace::ETIP_NotTurn)
+			InterpAOYaw = AO_Yaw;
+
+		CheckTurnInPlace(DeltaTime);
+	}
+	else
+	{
+		bRotateRootBone = false; 
+		StartingAimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+
+		TurnInPlace = ETurnInPlace::ETIP_NotTurn;
+	}
+}
+
+void UDT_AnimInstance::CheckTurnInPlace(const float& DeltaTime)
+{
+	if (AO_Yaw > 90.f)
+		TurnInPlace = ETurnInPlace::ETIP_Right;
+	else if (AO_Yaw < -90.f)
+		TurnInPlace = ETurnInPlace::ETIP_Left;
+
+	if (TurnInPlace != ETurnInPlace::ETIP_NotTurn)
+	{
+		InterpAOYaw = FMath::FInterpTo(InterpAOYaw, 0.f, DeltaTime, 4.f);
+		AO_Yaw = InterpAOYaw;
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurnInPlace = ETurnInPlace::ETIP_NotTurn;
+			StartingAimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
+}
+

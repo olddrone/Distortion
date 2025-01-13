@@ -40,13 +40,11 @@ private:
 
 	void DoDamage(const FHitResult& Victim);
 
-	FVector BezierCurve(const FVector& P0, const FVector& P1, const FVector& P2, float Alpha) const;
-
-	void CalculateControlPoints(const FVector& PreStart, const FVector& CurStart, const FVector& PreEnd, const FVector& CurEnd,
-		TPair<FVector, FVector>& CtrlPos);
+	TPair<FVector, FVector> CalculateControlPoints(const FVector& PreStart, const FVector& CurStart, 
+		const FVector& PreEnd, const FVector& CurEnd);
 
 	void PerformInterpolatedTraces(const FVector& PreStart, const FVector& CurStart,
-		const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPos,
+		const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPoint,
 		TArray<FHitResult>& HitResults);
 private:
 	UPROPERTY()

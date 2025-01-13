@@ -3,6 +3,7 @@
 
 #include "DT_CollisionManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Library/DT_CustomLibrary.h"
 #include "Interface/DT_CombatInterface.h"
 
 UDT_CollisionManager::UDT_CollisionManager()
@@ -48,10 +49,8 @@ void UDT_CollisionManager::TraceCheck()
 	DoLineTrace(BeforePoints.Key, CurStart, HitResults, FColor::Blue);
 	DoLineTrace(BeforePoints.Value, CurEnd, HitResults, FColor::Blue);
 	
-	TPair<FVector,FVector> CtrlPos;
-	CalculateControlPoints(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd, CtrlPos);
-
-	PerformInterpolatedTraces(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd,CtrlPos, HitResults);
+	TPair<FVector,FVector> CtrlPoint = CalculateControlPoints(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd);
+	PerformInterpolatedTraces(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd, CtrlPoint, HitResults);
 
 	HandleHitResults(HitResults);
 	BeforePoints = { CurStart, CurEnd };
@@ -100,14 +99,8 @@ void UDT_CollisionManager::DoSphereTrace(const FVector& Location, TArray<FHitRes
 	HitResults.Append(TempHitResults);
 }
 
-FVector UDT_CollisionManager::BezierCurve(const FVector& P0, const FVector& P1, const FVector& P2, float Alpha) const
-{
-	float OneMinusT = 1.0f - Alpha;
-	return (OneMinusT * OneMinusT * P0) + (2 * OneMinusT * Alpha * P1) + (Alpha * Alpha * P2);
-}
-
-void UDT_CollisionManager::CalculateControlPoints(const FVector& PreStart, const FVector& CurStart, 
-	const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPos)
+TPair<FVector, FVector> UDT_CollisionManager::CalculateControlPoints(const FVector& PreStart, const FVector& CurStart,
+	const FVector& PreEnd, const FVector& CurEnd)
 {
 	float DisStart = FVector::Dist(PreStart, CurStart);
 	float DisEnd = FVector::Dist(PreEnd, CurEnd);
@@ -115,38 +108,31 @@ void UDT_CollisionManager::CalculateControlPoints(const FVector& PreStart, const
 	FVector StartDir = (CurStart - PreStart).GetSafeNormal();
 	FVector EndDir = (CurEnd - PreEnd).GetSafeNormal();
 
-	float Dot = FVector::DotProduct(EndDir, StartDir);
-	float Radian = FMath::Acos(Dot);
-	float Degree = FMath::RadiansToDegrees(Radian);
-	
-	float Ratio = 180.f / (Degree);
-	float InterpStep = 10.0f;
+	float Ratio = 180.f / FMath::Max(FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(EndDir, StartDir))), 1.0f);
 
-	int32 NumStepsStart = FMath::CeilToInt(DisStart / Ratio);
-	int32 NumStepsEnd = FMath::CeilToInt(DisEnd / Ratio);
-	int32 NumSteps = FMath::CeilToInt(DisStart / InterpStep);
+	uint8 StepBegin = FMath::CeilToInt(DisStart / Ratio);
+	uint8 StepEnd = FMath::CeilToInt(DisEnd / Ratio);
 
-	FVector CtrlPosStart = (PreStart + CurStart) / 2.0f;
-	FVector CtrlPosEnd = (PreEnd + CurEnd) / 2.0f;
-	FVector CtrlDir = (CtrlPosStart - CtrlPosEnd).GetSafeNormal();
-	
-	CtrlPos = { CtrlPosStart + CtrlDir * -NumStepsStart,CtrlPosEnd + CtrlDir * -NumStepsEnd };
+	FVector CtrlPointStart = (PreStart + CurStart) * 0.5f;
+	FVector CtrlPointEnd = (PreEnd + CurEnd) * 0.5f;
+	FVector CtrlDir = (CtrlPointStart - CtrlPointEnd).GetSafeNormal();
+
+	return TPair<FVector, FVector>{CtrlPointStart + CtrlDir * -StepBegin, CtrlPointEnd + CtrlDir * -StepEnd};
 }
 
 void UDT_CollisionManager::PerformInterpolatedTraces(const FVector& PreStart, const FVector& CurStart,
-	const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPos,
+	const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPoint,
 	TArray<FHitResult>& HitResults)
 {
 	float DistanceStart = FVector::Dist(PreStart, CurStart);
-	int32 NumSteps = FMath::Max(FMath::CeilToInt(DistanceStart / 10.0f), 1);
-	for (int32 Step = 1; Step < NumSteps; ++Step)
+	uint8 Steps = FMath::Max(FMath::CeilToInt(DistanceStart / 5.0f), 1);
+	for (uint8 i = 1; i < Steps; ++i)
 	{
-		float Alpha = static_cast<float>(Step) / static_cast<float>(NumSteps);
+		float T = static_cast<float>(i)/Steps;
 
-		FVector InterpStart = BezierCurve(PreStart, CtrlPos.Key, CurStart, Alpha);
-		FVector InterpEnd = BezierCurve(PreEnd, CtrlPos.Value, CurEnd, Alpha);
+		FVector StartLocation = UDT_CustomLibrary::BezierCurve_Quadratic(PreStart, CtrlPoint.Key, CurStart, T);
+		FVector EndLocation = UDT_CustomLibrary::BezierCurve_Quadratic(PreEnd, CtrlPoint.Value, CurEnd, T);
 
-		DoLineTrace(InterpStart, InterpEnd, HitResults, FColor::Yellow);
+		DoLineTrace(StartLocation, EndLocation, HitResults, FColor::Yellow);
 	}
 }
-

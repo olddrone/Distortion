@@ -49,3 +49,25 @@ FName UDT_CustomLibrary::CheckSectionName_4Direction(const float& Theta)
 
 	return FName("Bwd");
 }
+
+FVector UDT_CustomLibrary::BezierCurve_Quadratic(const FVector& P0, const FVector& P1, const FVector& P2, float T)
+{
+	// 2차 베지어 곡선 공식, B(t) = (1-t)^2*P0 + 2t(1-t)*P1 + t^2P2
+	float OneMinusT = 1.f - T;
+	return (OneMinusT * OneMinusT * P0) + (2 * T * OneMinusT * P1) + (T * T * P2);
+}
+
+FName UDT_CustomLibrary::CheckSectionName_Guard(const FName& HitDirection, const uint8& AttackDirection)
+{
+	static enum AttDir { Right = 2, Left };
+
+	FName Ret = "Default";
+	if ((HitDirection == "Fwd" && AttackDirection == AttDir::Right) ||
+		(HitDirection == "RT" && AttackDirection != AttDir::Left))
+		Ret = "RT";
+	else if ((HitDirection == "Fwd" && AttackDirection == AttDir ::Left) ||
+		(HitDirection == "LT" && AttackDirection != AttDir ::Right))
+		Ret = "LT";
+
+	return Ret;
+}

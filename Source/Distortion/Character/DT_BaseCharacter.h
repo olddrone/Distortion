@@ -24,8 +24,7 @@ class DISTORTION_API ADT_BaseCharacter : public ACharacter,
 public:
 	ADT_BaseCharacter();
 
-	virtual void Tick(float DeltaTime) override;
-	virtual void OnRep_ReplicatedMovement() override;
+	// virtual void Tick(float DeltaTime) override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }
 	virtual void SetActionState(const EActionState& State) override { ActionState = State; }
@@ -36,16 +35,11 @@ public:
 	virtual bool GetLMBDown() const override { return bLMBDown; }
 	virtual bool GetRMBDown() const override { return bRMBDown; }
 
-	virtual float GetAimOffsetYaw() const override { return AimOffsetYaw; }
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
-	virtual ETurnInPlace GetTurnInPlace() const override { return TurnInPlace; }
 	FORCEINLINE UDT_CombatComponent* GetCombatComponent() const { return CombatComp; }
-	virtual bool ShouldRotateRootBone() const override { return bRotateRootBone; }
 
 protected:
 	// virtual void BeginPlay() override;
-	void AimOffset(const float& DeltaTime);
-	void CheckTurnInPlace(const float& DeltaTime);
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -56,7 +50,7 @@ protected:
 public:
 	UFUNCTION()
 	virtual void LMB(bool bIsAttack);
-	
+
 	UFUNCTION()
 	virtual void RMB(bool bHoldRotationYaw);
 
@@ -85,12 +79,6 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	bool bRMBDown = false;
 
-	float AimOffsetYaw = 0.f;
-	float InterpAOYaw;
-	FRotator StartingAimRotation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	ETurnInPlace TurnInPlace = ETurnInPlace::ETIP_NotTurn;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
@@ -138,7 +126,6 @@ public:
 	virtual void ToAttachSocket(const FName& SocketName) override;
 
 public:
-	void SimProxiesTurn();
 
 	void AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
 
@@ -148,17 +135,6 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
 
-private:
-	bool bRotateRootBone;
-	float TurnThreshold = 0.5f;
-	FRotator ProxyRotationLastFrame;
-	FRotator ProxyRotation;
-	float ProxyYaw;
-	float TimeSinceLastMovementReplication;
-
 public:
-
-
 	void Guard(const FName& SectionName);
-
 };
