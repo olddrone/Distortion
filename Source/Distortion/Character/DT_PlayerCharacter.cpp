@@ -5,7 +5,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Controller/DT_PlayerController.h"
-#include "DrawDebugHelpers.h"
 
 #include "PlayerState/DT_PlayerState.h"
 #include "UI/HUD/DT_HUD.h"
@@ -23,63 +22,22 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
-	
 }
 
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
-	if (State)
-	{
-		AttributeComp = State->GetAttributes();
-		if (IsLocallyControlled())
-		{
-			const APlayerController* PlayerController = GetController<APlayerController>();
-			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
-				Hud->InitOverlay(State, AttributeComp);
-		}
-	}
-}
-
-void ADT_PlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	FVector Start = GetActorLocation();
-	Start.Z = 5.f;
-	const FVector Forward = GetActorForwardVector().GetSafeNormal();
-	FVector End = (GetCharacterMovement()->Velocity).GetSafeNormal();
-	FVector Tmp = GetLastMovementInputVector().GetSafeNormal();
-
-	DrawDebugDirectionalArrow(GetWorld(), Start, Start + Forward * 100.f, 5.f, FColor::Red, false, -1.f, 0, 2.f);
-	DrawDebugDirectionalArrow(GetWorld(), Start, Start + End * 100.f, 5.f, FColor::Green, false, -1.f, 0, 2.f);
-	DrawDebugDirectionalArrow(GetWorld(), Start, Start + Tmp * 100.f, 5.f, FColor::Blue, false, -1.f, 0, 2.f);
-
-	FRotator ControlRotation = GetControlRotation();
-	ControlRotation.Pitch = GetActorRotation().Pitch;
-	ControlRotation.Roll = GetActorRotation().Roll;
-
-	FVector ViewDirection = FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::X).GetSafeNormal();
-	DrawDebugDirectionalArrow(GetWorld(), Start, Start + ViewDirection * 100.f, 5.f, FColor::Orange, false, -1.f, 0, 2.f);
+	// 리슨 서버용
+	InitAttributeComp();
 }
 
 void ADT_PlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
-	if (State)
-	{
-		AttributeComp = State->GetAttributes();
-		if (IsLocallyControlled())
-		{
-			const APlayerController* PlayerController = GetController<APlayerController>();
-			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
-				Hud->InitOverlay(State, AttributeComp);
-		}
-	}
+	// 클라이언트용
+	InitAttributeComp();
 }
 
 void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
@@ -100,11 +58,26 @@ void ADT_PlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	auto* controller = Cast<ADT_PlayerController>(GetController());
 
-	if (IsValid(controller))
+	if (IsValid(controller) && IsLocallyControlled())
 	{
 		controller->DodgeDelegate.BindUObject(this, &ADT_BaseCharacter::Dodge);
 		controller->RMBDelegate.BindUObject(this, &ADT_PlayerCharacter::RMB);
 		controller->LMBDelegate.BindUObject(this, &ADT_BaseCharacter::LMB);
 		controller->EquipDelegate.BindUObject(this, &ADT_BaseCharacter::Equip);
+	}
+}
+
+void ADT_PlayerCharacter::InitAttributeComp()
+{
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		if (IsLocallyControlled())
+		{
+			const APlayerController* PlayerController = GetController<APlayerController>();
+			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
+				Hud->InitOverlay(State, AttributeComp);
+		}
 	}
 }

@@ -33,8 +33,6 @@ float UDT_AttributeComponent::ApplyDamage(const float Damage)
 {
 	SetHealth(Health - Damage);
 
-	if (Health <= 0.f)
-		Dead.Broadcast();
 	UE_LOG(LogTemp, Warning, TEXT("Health : %f"), Health);
 	return Damage;
 }
@@ -49,7 +47,7 @@ void UDT_AttributeComponent::SetHealth(const float InHealth)
 void UDT_AttributeComponent::OnRep_Health()
 {
 	HealthChange.Broadcast(Health);
-	if (Health <= 0.f)
+	if (Health <= KINDA_SMALL_NUMBER)
 		Dead.Broadcast();
 }
 

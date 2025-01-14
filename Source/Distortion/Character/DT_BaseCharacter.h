@@ -28,7 +28,7 @@ public:
 
 	virtual EActionState GetActionState() const override { return ActionState; }
 	virtual void SetActionState(const EActionState& State) override { ActionState = State; }
-	virtual void RestoreState() override { if (GetEquipWeaponType() != EWeaponType::EWT_Gun) SetRotationYaw(bRMBDown); }
+	virtual void RestoreState() override { if (GetEquipWeaponType() != EWeaponType::EWT_Gun) RMB(bRMBDown); }
 	virtual void SetEquipWeaponType(const EWeaponType& WeaponType) override { EquipWeaponType = WeaponType; }
 	virtual EWeaponType GetEquipWeaponType() const override { return EquipWeaponType; }
 
@@ -51,21 +51,6 @@ public:
 	UFUNCTION()
 	virtual void LMB(bool bIsAttack);
 
-	UFUNCTION()
-	virtual void RMB(bool bHoldRotationYaw);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerRPCRMBDown(bool bHoldRotationYaw);
-
-	UFUNCTION()
-	void SetRotationYaw(bool bHoldRotationYaw);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerRPCSetRotationYaw(bool bHoldRotationYaw);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCSetRotationYaw(bool bHoldRotationYaw);
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EActionState ActionState = EActionState::EAS_Unocuupied;
@@ -76,8 +61,24 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bLMBDown = false;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+
+public:
+	UFUNCTION()
+	virtual void RMB(bool bHoldRotationYaw);
+
+protected:
+
+	UPROPERTY(ReplicatedUsing = OnRep_RMBDown)
 	bool bRMBDown = false;
+
+	UFUNCTION()
+	void OnRep_RMBDown();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetRotationYaw(bool bHoldRotationYaw);
+
+	UFUNCTION()
+	void SetRotationYaw(bool bHoldRotationYaw);
 
 
 protected:
@@ -126,7 +127,6 @@ public:
 	virtual void ToAttachSocket(const FName& SocketName) override;
 
 public:
-
 	void AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
 
 	UFUNCTION(Server, Unreliable)

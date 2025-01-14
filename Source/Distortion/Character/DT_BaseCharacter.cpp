@@ -6,7 +6,6 @@
 #include "Component/DT_CombatComponent.h"
 #include "Library/DT_CustomLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
 #include "Net/UnrealNetwork.h"
 
 ADT_BaseCharacter::ADT_BaseCharacter()
@@ -68,37 +67,30 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
 	bRMBDown = bHoldRotationYaw;
-	ServerRPCRMBDown(bHoldRotationYaw);
+	CombatComp->SetAimFactor(bRMBDown ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
 
-	const float Value = (bRMBDown) ? 0.58f : 0.f;
-	CombatComp->SetAimFactor(Value);
-	GetCharacterMovement()->MaxWalkSpeed = (bRMBDown) ? WalkSpeed::Walk : WalkSpeed::Run;
-	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
-		SetRotationYaw(bHoldRotationYaw);
+	SetRotationYaw(bRMBDown);
+	
+	if(GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+		ServerSetRotationYaw(bRMBDown);
+
 }
 
-void ADT_BaseCharacter::ServerRPCRMBDown_Implementation(bool bHoldRotationYaw)
+void ADT_BaseCharacter::OnRep_RMBDown()
+{
+	SetRotationYaw(bRMBDown);
+}
+
+void ADT_BaseCharacter::ServerSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
 	bRMBDown = bHoldRotationYaw;
+	SetRotationYaw(bRMBDown);
 }
 
 void ADT_BaseCharacter::SetRotationYaw(bool bHoldRotationYaw)
-{
-	if (bUseControllerRotationYaw == bHoldRotationYaw)
-		return;
-	if (IsLocallyControlled())
-		ServerRPCSetRotationYaw(bHoldRotationYaw);
-}
-
-void ADT_BaseCharacter::ServerRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
-{
-	MulticastRPCSetRotationYaw(bHoldRotationYaw);
-}
-
-void ADT_BaseCharacter::MulticastRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
 	bUseControllerRotationYaw = bHoldRotationYaw;
 	GetCharacterMovement()->bOrientRotationToMovement = !bHoldRotationYaw;
@@ -140,6 +132,7 @@ void ADT_BaseCharacter::Hit(const FName& SectionName)
 
 void ADT_BaseCharacter::ImmediateRotate()
 {
+	// 오른쪽이면 cos, 왼쪽이면 acos
 	if (bRMBDown) // 현재 보고 있는 방향으로 회전
 	{
 		FRotator Rotation = GetControlRotation();
@@ -224,11 +217,10 @@ void ADT_BaseCharacter::GetHit(const FVector_NetQuantize& InstigatorLocation, co
 	}
 }
 
-// 해당 클라에서만 실행
 void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize& InstigatorLocation, 
 	const int8& DamageAmount, const FDamagePacket& DamagePacket)
 {
-	if (IsLocallyControlled())
+	if (IsLocallyControlled()) // 해당 클라에서만 실행됨
 	{
 		FVector Forward = GetActorForwardVector().GetSafeNormal();
 		FVector ToInstigator = (InstigatorLocation - GetActorLocation()).GetSafeNormal();
@@ -252,18 +244,18 @@ void ADT_BaseCharacter::ToAttachSocket(const FName& SocketName)
 	CombatComp->AttachSocket(SocketName);
 }
 
+void ADT_BaseCharacter::Guard(const FName& SectionName)
+{
+	SetActionState(EActionState::EAS_Guard);
+	CombatComp->Guard(SectionName);
+}
+
 void ADT_BaseCharacter::AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption)
 {
 	if (HasAuthority())
 		MulticastRPCAnimTickOption(AnimTickOption);
 	else if (IsLocallyControlled())
 		ServerRPCAnimTickOption(AnimTickOption);
-}
-
-void ADT_BaseCharacter::Guard(const FName& SectionName)
-{
-	SetActionState(EActionState::EAS_Guard);
-	CombatComp->Guard(SectionName);
 }
 
 void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)

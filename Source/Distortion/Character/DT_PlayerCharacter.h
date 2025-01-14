@@ -17,7 +17,6 @@ class DISTORTION_API ADT_PlayerCharacter : public ADT_BaseCharacter
 public:
 	ADT_PlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
-	virtual void Tick(float DeltaTime) override;
 
 	virtual void OnRep_PlayerState() override;
 	
@@ -26,6 +25,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void InitAttributeComp();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
