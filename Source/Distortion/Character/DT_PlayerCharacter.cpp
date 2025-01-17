@@ -73,8 +73,8 @@ void ADT_PlayerCharacter::InitAttributeComp()
 	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
 	if (State)
 	{
-		// AttributeComp = State->GetAttributes();
-		// AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
+		AttributeComp = State->GetAttributes();
+		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
 
 		const APlayerController* PlayerController = GetController<APlayerController>();
 		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;

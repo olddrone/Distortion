@@ -23,8 +23,6 @@ class DISTORTION_API ADT_BaseCharacter : public ACharacter,
 
 public:
 	ADT_BaseCharacter();
-	virtual void PostInitializeComponents() override;
-
 	// virtual void Tick(float DeltaTime) override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }

@@ -32,16 +32,6 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
-
-	AttributeComp = CreateDefaultSubobject<UDT_AttributeComponent>(TEXT("AttributeComp"));
-}
-
-void ADT_BaseCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	if (AttributeComp)
-		AttributeComp->Dead.AddUObject(this, &ADT_BaseCharacter::Dead);
 }
 
 void ADT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
