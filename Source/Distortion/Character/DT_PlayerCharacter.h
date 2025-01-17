@@ -22,6 +22,7 @@ public:
 	
 	virtual void RMB(bool bHoldRotationYaw) override;
 
+	virtual void Dead() override;
 
 protected:
 	virtual void BeginPlay() override;

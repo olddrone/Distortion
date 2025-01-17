@@ -32,7 +32,16 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
-	
+
+	AttributeComp = CreateDefaultSubobject<UDT_AttributeComponent>(TEXT("AttributeComp"));
+}
+
+void ADT_BaseCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (AttributeComp)
+		AttributeComp->Dead.AddUObject(this, &ADT_BaseCharacter::Dead);
 }
 
 void ADT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -76,16 +85,17 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 	
 	if(GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 		ServerSetRotationYaw(bRMBDown);
-
 }
 
 void ADT_BaseCharacter::OnRep_RMBDown()
 {
+	// 멀티 캐스트
 	SetRotationYaw(bRMBDown);
 }
 
 void ADT_BaseCharacter::ServerSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
+	// 서버 측에서도 실행
 	bRMBDown = bHoldRotationYaw;
 	SetRotationYaw(bRMBDown);
 }
@@ -126,13 +136,15 @@ void ADT_BaseCharacter::Dodge()
 
 void ADT_BaseCharacter::Hit(const FName& SectionName)
 {
+	if (GetActionState() == EActionState::EAS_Dead)
+		return;
 	SetActionState(EActionState::EAS_Hit);
 	CombatComp->Hit(SectionName);
 }
 
 void ADT_BaseCharacter::ImmediateRotate()
 {
-	// 오른쪽이면 cos, 왼쪽이면 acos
+	// 오른쪽이면 cos, 왼쪽이면 acos로 바꿔야
 	if (bRMBDown) // 현재 보고 있는 방향으로 회전
 	{
 		FRotator Rotation = GetControlRotation();
@@ -198,13 +210,15 @@ void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 
 void ADT_BaseCharacter::ActivateCollision(const FDamagePacket& DamagePacket)
 {
-	AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
+	if(GetNetMode() == ENetMode::NM_DedicatedServer)
+		AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
 	CombatComp->CollisionStart(DamagePacket);
 }
 
 void ADT_BaseCharacter::DeactivateCollision()
 {
-	AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPose);
+	if (GetNetMode() == ENetMode::NM_DedicatedServer)
+		AnimTickOption(EVisibilityBasedAnimTickOption::AlwaysTickPose);
 	CombatComp->CollisionEnd();
 }
 
@@ -213,14 +227,15 @@ void ADT_BaseCharacter::GetHit(const FVector_NetQuantize& InstigatorLocation, co
 	if (HasAuthority())
 	{
 		AttributeComp->ApplyDamage(DamageAmount);
-		ClientRPCGetHit(InstigatorLocation, DamageAmount, DamagePacket);
+		if (AttributeComp->GetHealth() > 0.f)
+			ClientRPCGetHit(InstigatorLocation, DamageAmount, DamagePacket);
 	}
 }
 
 void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize& InstigatorLocation, 
 	const int8& DamageAmount, const FDamagePacket& DamagePacket)
-{
-	if (IsLocallyControlled()) // 해당 클라에서만 실행됨
+{ 
+	if (IsLocallyControlled())
 	{
 		FVector Forward = GetActorForwardVector().GetSafeNormal();
 		FVector ToInstigator = (InstigatorLocation - GetActorLocation()).GetSafeNormal();
@@ -252,10 +267,7 @@ void ADT_BaseCharacter::Guard(const FName& SectionName)
 
 void ADT_BaseCharacter::AnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption)
 {
-	if (HasAuthority())
-		MulticastRPCAnimTickOption(AnimTickOption);
-	else if (IsLocallyControlled())
-		ServerRPCAnimTickOption(AnimTickOption);
+	ServerRPCAnimTickOption(AnimTickOption);
 }
 
 void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
@@ -266,4 +278,16 @@ void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibility
 void ADT_BaseCharacter::MulticastRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
 {
 	GetMesh()->VisibilityBasedAnimTickOption = AnimTickOption;
+}
+
+void ADT_BaseCharacter::Dead()
+{
+	SetActionState(EActionState::EAS_Dead);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	SetActorEnableCollision(false);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0);
+	AnimInstance->Montage_Play(DeadMontage);
+	
 }

@@ -23,6 +23,7 @@ class DISTORTION_API ADT_BaseCharacter : public ACharacter,
 
 public:
 	ADT_BaseCharacter();
+	virtual void PostInitializeComponents() override;
 
 	// virtual void Tick(float DeltaTime) override;
 
@@ -137,4 +138,9 @@ public:
 
 public:
 	void Guard(const FName& SectionName);
+
+	virtual void Dead();
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> DeadMontage;
+
 };

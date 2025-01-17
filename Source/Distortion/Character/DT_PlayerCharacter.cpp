@@ -9,6 +9,7 @@
 #include "PlayerState/DT_PlayerState.h"
 #include "UI/HUD/DT_HUD.h"
 #include "Camera/DT_CameraManager.h"
+#include "Component/DT_AttributeComponent.h"
 
 ADT_PlayerCharacter::ADT_PlayerCharacter()
 {
@@ -28,7 +29,7 @@ void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// 리슨 서버용
+	// 리슨 서버
 	InitAttributeComp();
 }
 
@@ -36,7 +37,7 @@ void ADT_PlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	// 클라이언트용
+	// 클라
 	InitAttributeComp();
 }
 
@@ -72,12 +73,21 @@ void ADT_PlayerCharacter::InitAttributeComp()
 	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
 	if (State)
 	{
-		AttributeComp = State->GetAttributes();
-		if (IsLocallyControlled())
-		{
-			const APlayerController* PlayerController = GetController<APlayerController>();
-			if (ADT_HUD* Hud = PlayerController ? PlayerController->GetHUD<ADT_HUD>() : nullptr)
-				Hud->InitOverlay(State, AttributeComp);
-		}
+		// AttributeComp = State->GetAttributes();
+		// AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
+
+		const APlayerController* PlayerController = GetController<APlayerController>();
+		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
+		if (IsValid(Hud))
+			Hud->InitOverlay(State, AttributeComp);
 	}
+}
+
+void ADT_PlayerCharacter::Dead()
+{
+	Super::Dead();
+	
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+		DisableInput(PlayerController);
 }

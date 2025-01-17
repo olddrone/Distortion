@@ -7,9 +7,6 @@ UDT_AttributeComponent::UDT_AttributeComponent()
 {
 	bWantsInitializeComponent = true;
 	SetIsReplicatedByDefault(true);
-
-	SetHealth(Attributes.MaxHealth);
-	SetStamina(Attributes.MaxHealth);
 }
 
 void UDT_AttributeComponent::BeginPlay()
@@ -20,6 +17,9 @@ void UDT_AttributeComponent::BeginPlay()
 void UDT_AttributeComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
+
+	SetHealth(Attributes.MaxHealth);
+	SetStamina(Attributes.MaxStamina);
 }
 
 void UDT_AttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -31,22 +31,24 @@ void UDT_AttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 float UDT_AttributeComponent::ApplyDamage(const float Damage)
 {
-	SetHealth(Health - Damage);
+	SetHealth(Health - Damage);	
 
-	UE_LOG(LogTemp, Warning, TEXT("Health : %f"), Health);
+	if (Health <= KINDA_SMALL_NUMBER)
+		Dead.Broadcast();
 	return Damage;
 }
 
 void UDT_AttributeComponent::SetHealth(const float InHealth)
 {
 	Health = FMath::Clamp<float>(InHealth, 0.0f, Attributes.MaxHealth);
-
+	
 	HealthChange.Broadcast(Health);
 }
 
 void UDT_AttributeComponent::OnRep_Health()
 {
 	HealthChange.Broadcast(Health);
+
 	if (Health <= KINDA_SMALL_NUMBER)
 		Dead.Broadcast();
 }

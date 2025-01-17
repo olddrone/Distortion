@@ -20,6 +20,7 @@ class DISTORTION_API UDT_AttributeComponent : public UActorComponent
 
 public:
 	UDT_AttributeComponent();
+
 	float ApplyDamage(const float Damage);
 
 	FORCEINLINE float GetHealth() const { return Health; }
@@ -50,4 +51,5 @@ private:
 
 	UPROPERTY(Transient, VisibleInstanceOnly, meta = (AllowPrivateAccess = "true"))
 	FDT_Attributes Attributes;
+
 };

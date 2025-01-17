@@ -70,12 +70,10 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 	
 	if (Controller)
 	{
-		ADT_HUD* Hud = Cast< ADT_HUD>(Controller->GetHUD());
+		ADT_HUD* Hud = Cast<ADT_HUD>(Controller->GetHUD());
 		if (Hud)
 		{
 			FCrosshairsTextures Textures;
-
-
 			Textures = Weapon->GetCrosshairs();
 			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
 			FVector2D VelocityMultiplierRange(0, 1);
@@ -205,7 +203,6 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 	else
 	{
 		CollisionManager->SetDamagePacket(DamagePacket);
-		// CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
 		CollisionManager->SetDamage(BaseDamage);
 		CollisionManager->DoCollision(GetOwner());
 	}
