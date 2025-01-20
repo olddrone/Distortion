@@ -1,27 +1,32 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DT_PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Character.h"
+#include "Character/DT_PlayerCharacter.h"
+#include "Camera/DT_CameraManager.h"
 
 ADT_PlayerController::ADT_PlayerController()
 {
-	bReplicates = true;
+}
+
+void ADT_PlayerController::DisableInput(APlayerController* PlayerController)
+{
+	Super::DisableInput(PlayerController);
 }
 
 void ADT_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	if (Subsystem)
 		Subsystem->AddMappingContext(InputData->MappingContext, 0);
 
-	ControlledCharacter = GetCharacter();
-	if (IsValid(ControlledCharacter))
-		StateInterface = Cast<IDT_StateInterface>(ControlledCharacter);
+	PlayerCharacter = Cast<ADT_PlayerCharacter>(GetCharacter());
+	if (IsValid(PlayerCharacter))
+		StateInterface = Cast<IDT_StateInterface>(PlayerCharacter);
 }
 
 void ADT_PlayerController::SetupInputComponent()
@@ -31,7 +36,8 @@ void ADT_PlayerController::SetupInputComponent()
 	UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent);
 
 	EIC->BindAction(InputData->MoveAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Move);
-	EIC->BindAction(InputData->LookAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Look);
+	EIC->BindAction(InputData->LookAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Look);	
+
 	EIC->BindAction(InputData->JumpAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Jump);
 	EIC->BindAction(InputData->DodgeAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Dodge);
 	EIC->BindAction(InputData->CrouchAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Crouch);
@@ -43,6 +49,7 @@ void ADT_PlayerController::SetupInputComponent()
 	EIC->BindAction(InputData->LMBAction, ETriggerEvent::Completed, this, &ADT_PlayerController::LMBEnd);
 
 	EIC->BindAction(InputData->EquipAction, ETriggerEvent::Started, this, &ADT_PlayerController::Equip);
+
 }
 
 void ADT_PlayerController::Move(const FInputActionValue& InputActionValue)
@@ -54,63 +61,67 @@ void ADT_PlayerController::Move(const FInputActionValue& InputActionValue)
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	ControlledCharacter->AddMovementInput(ForwardDirection, InputAxisVector.Y);
-	ControlledCharacter->AddMovementInput(RightDirection, InputAxisVector.X);
+	PlayerCharacter->AddMovementInput(ForwardDirection, InputAxisVector.Y);
+	PlayerCharacter->AddMovementInput(RightDirection, InputAxisVector.X);
 }
 
 void ADT_PlayerController::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	ControlledCharacter->AddControllerYawInput(LookAxisVector.X);
-	ControlledCharacter->AddControllerPitchInput(LookAxisVector.Y);
+	PlayerCharacter->AddControllerYawInput(LookAxisVector.X);
+	PlayerCharacter->AddControllerPitchInput(LookAxisVector.Y);
 }
 
 void ADT_PlayerController::Jump()
 {
-	ControlledCharacter->Jump();
+	PlayerCharacter->Jump();
 }
 
 void ADT_PlayerController::Dodge()
 {
-	if (DodgeDelegate.IsBound())
-		DodgeDelegate.Execute();
+	PlayerCharacter->Dodge();
 }
 
 void ADT_PlayerController::Crouch()
 {
-	if (ControlledCharacter->bIsCrouched)
-		ControlledCharacter->UnCrouch();
-	else
-		ControlledCharacter->Crouch();
+	(PlayerCharacter->bIsCrouched) ? PlayerCharacter->UnCrouch() : PlayerCharacter->Crouch();	
 }
 
 void ADT_PlayerController::RMBStart()
 {
-	if (RMBDelegate.IsBound())
-		RMBDelegate.Execute(true);
+	PlayerCharacter->RMB(true);
+	SetZoom(true);
 }
 
 void ADT_PlayerController::RMBEnd()
 {
-	if (RMBDelegate.IsBound())
-		RMBDelegate.Execute(false);
+	PlayerCharacter->RMB(false);
+	SetZoom(false);
 }
 
 void ADT_PlayerController::LMBStart()
 {
-	if (LMBDelegate.IsBound())
-		LMBDelegate.Execute(true);
+	PlayerCharacter->LMB(true);
 }
 
 void ADT_PlayerController::LMBEnd()
 {
-	if (LMBDelegate.IsBound())
-		LMBDelegate.Execute(false);
+	PlayerCharacter->LMB(false);
 }
 
 void ADT_PlayerController::Equip()
 {
-	if (EquipDelegate.IsBound())
-		EquipDelegate.Execute();
+	PlayerCharacter->Equip();
 }
+
+void ADT_PlayerController::SetZoom(const bool& bIsZoom)
+{
+	if (StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
+	{
+		ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
+		if (CameraManager)
+			CameraManager->SetZoomState(bIsZoom);
+	}
+}
+

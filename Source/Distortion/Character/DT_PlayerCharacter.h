@@ -19,13 +19,11 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void OnRep_PlayerState() override;
-	
-	virtual void RMB(bool bHoldRotationYaw) override;
 
 	virtual void Dead() override;
 
 protected:
-	virtual void BeginPlay() override;
+	// virtual void BeginPlay() override;
 	void InitAttributeComp();
 
 private:

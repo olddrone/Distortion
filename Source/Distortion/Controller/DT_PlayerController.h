@@ -10,11 +10,6 @@
 
 struct FInputActionValue;
 
-DECLARE_DELEGATE(FEquipDelegate);
-DECLARE_DELEGATE_OneParam(FLMBDelegate, bool);
-DECLARE_DELEGATE_OneParam(FRMBDelegate, bool);
-DECLARE_DELEGATE(FDodgeDelegate);
-
 /**
  * 
  */
@@ -24,11 +19,8 @@ class DISTORTION_API ADT_PlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	ADT_PlayerController();
-
-	FDodgeDelegate DodgeDelegate;
-	FLMBDelegate LMBDelegate;
-	FRMBDelegate RMBDelegate;
-	FEquipDelegate EquipDelegate;
+	
+	virtual void DisableInput(class APlayerController* PlayerController) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,12 +42,17 @@ private:
 	void Equip();
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	void SetZoom(const bool& bIsZoom);
+
+private:
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPDA_Input> InputData = nullptr;
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<ACharacter> ControlledCharacter = nullptr;
+	TObjectPtr<class ADT_PlayerCharacter> PlayerCharacter = nullptr;
 
 	// TScriptInterface<ILT_StateInterface>
 	IDT_StateInterface* StateInterface;
+
 };

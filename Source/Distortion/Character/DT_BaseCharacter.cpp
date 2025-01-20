@@ -274,10 +274,8 @@ void ADT_BaseCharacter::Dead()
 {
 	SetActionState(EActionState::EAS_Dead);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	SetActorEnableCollision(false);
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->StopAllMontages(0);
-	AnimInstance->Montage_Play(DeadMontage);
-	
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
 }

@@ -3,12 +3,11 @@
 #include "DT_PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Camera/CameraComponent.h"
 #include "Controller/DT_PlayerController.h"
 
+#include "Camera/CameraComponent.h"
 #include "PlayerState/DT_PlayerState.h"
 #include "UI/HUD/DT_HUD.h"
-#include "Camera/DT_CameraManager.h"
 #include "Component/DT_AttributeComponent.h"
 
 ADT_PlayerCharacter::ADT_PlayerCharacter()
@@ -28,44 +27,15 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	// 리슨 서버
-	InitAttributeComp();
+	
+	InitAttributeComp();// 리슨 서버
 }
 
 void ADT_PlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	// 클라
-	InitAttributeComp();
-}
-
-void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
-{
-	Super::RMB(bHoldRotationYaw);
-
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController && GetEquipWeaponType() == EWeaponType::EWT_Gun)
-	{
-		ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerController->PlayerCameraManager);
-		if (CameraManager)
-			CameraManager->SetZoomState(bRMBDown);
-	}
-}
-
-void ADT_PlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	auto* controller = Cast<ADT_PlayerController>(GetController());
-
-	if (IsValid(controller) && IsLocallyControlled())
-	{
-		controller->DodgeDelegate.BindUObject(this, &ADT_BaseCharacter::Dodge);
-		controller->RMBDelegate.BindUObject(this, &ADT_PlayerCharacter::RMB);
-		controller->LMBDelegate.BindUObject(this, &ADT_BaseCharacter::LMB);
-		controller->EquipDelegate.BindUObject(this, &ADT_BaseCharacter::Equip);
-	}
+	InitAttributeComp(); // 클라
 }
 
 void ADT_PlayerCharacter::InitAttributeComp()
@@ -89,5 +59,8 @@ void ADT_PlayerCharacter::Dead()
 	
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
-		DisableInput(PlayerController);
+	{
+		PlayerController->DisableInput(nullptr); // DisableInput(PlayerController);
+
+	}
 }

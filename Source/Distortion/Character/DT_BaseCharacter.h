@@ -138,7 +138,4 @@ public:
 	void Guard(const FName& SectionName);
 
 	virtual void Dead();
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAnimMontage> DeadMontage;
-
 };
