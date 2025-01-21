@@ -10,6 +10,10 @@
 #include "UI/HUD/DT_HUD.h"
 #include "Component/DT_AttributeComponent.h"
 
+#include "GameFramework/GameMode.h"
+#include "TimerManager.h"
+#include "Interface/DT_RespawnInterface.h"
+
 ADT_PlayerCharacter::ADT_PlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -27,8 +31,8 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	
-	InitAttributeComp();// ¸®½¼ ¼­¹ö
+
+	InitAttributeComp(); // ¸®½¼ ¼­¹ö
 }
 
 void ADT_PlayerCharacter::OnRep_PlayerState()
@@ -38,29 +42,37 @@ void ADT_PlayerCharacter::OnRep_PlayerState()
 	InitAttributeComp(); // Å¬¶ó
 }
 
-void ADT_PlayerCharacter::InitAttributeComp()
-{
-	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
-	if (State)
-	{
-		AttributeComp = State->GetAttributes();
-		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
-
-		const APlayerController* PlayerController = GetController<APlayerController>();
-		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
-		if (IsValid(Hud))
-			Hud->InitOverlay(State, AttributeComp);
-	}
-}
-
 void ADT_PlayerCharacter::Dead()
 {
 	Super::Dead();
 	
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
-	{
 		PlayerController->DisableInput(nullptr); // DisableInput(PlayerController);
 
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
+}
+
+void ADT_PlayerCharacter::Respawn()
+{
+	IDT_RespawnInterface* Interface = Cast<IDT_RespawnInterface>(GetWorld()->GetAuthGameMode());
+	if (Interface)
+		Interface->RequestPlayerRespawn(this, Controller);
+}
+
+void ADT_PlayerCharacter::InitAttributeComp()
+{
+	ADT_PlayerState* State = GetPlayerState<ADT_PlayerState>();
+	if (State)
+	{
+		AttributeComp = State->GetAttributes();
+		AttributeComp->InitValue();
+		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
+		
+		const APlayerController* PlayerController = GetController<APlayerController>();
+		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
+		if (IsValid(Hud))
+			Hud->InitOverlay(State, AttributeComp);
 	}
 }

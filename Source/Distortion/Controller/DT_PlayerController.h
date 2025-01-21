@@ -19,12 +19,15 @@ class DISTORTION_API ADT_PlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	ADT_PlayerController();
-	
-	virtual void DisableInput(class APlayerController* PlayerController) override;
 
 protected:
-	virtual void BeginPlay() override;
+	// virtual void BeginPlay() override;
+
 	virtual void SetupInputComponent() override;
+
+	virtual void OnPossess(APawn* InPawn) override; 
+	virtual void OnRep_Pawn() override;
+	void Init();
 
 private:
 	void Move(const FInputActionValue& InputActionValue);
@@ -47,7 +50,6 @@ private:
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPDA_Input> InputData = nullptr;
-
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ADT_PlayerCharacter> PlayerCharacter = nullptr;

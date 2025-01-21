@@ -71,6 +71,7 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
 
+	// 해당 클라
 	SetRotationYaw(bRMBDown);
 	
 	if(GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
@@ -85,7 +86,6 @@ void ADT_BaseCharacter::OnRep_RMBDown()
 
 void ADT_BaseCharacter::ServerSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
-	// 서버 측에서도 실행
 	bRMBDown = bHoldRotationYaw;
 	SetRotationYaw(bRMBDown);
 }
@@ -262,20 +262,16 @@ void ADT_BaseCharacter::AnimTickOption(const EVisibilityBasedAnimTickOption& Ani
 
 void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
 {
-	MulticastRPCAnimTickOption(AnimTickOption);
-}
-
-void ADT_BaseCharacter::MulticastRPCAnimTickOption_Implementation(const EVisibilityBasedAnimTickOption& AnimTickOption)
-{
 	GetMesh()->VisibilityBasedAnimTickOption = AnimTickOption;
 }
 
 void ADT_BaseCharacter::Dead()
 {
 	SetActionState(EActionState::EAS_Dead);
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	// GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
+
 }

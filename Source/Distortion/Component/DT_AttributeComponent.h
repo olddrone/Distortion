@@ -20,21 +20,23 @@ class DISTORTION_API UDT_AttributeComponent : public UActorComponent
 
 public:
 	UDT_AttributeComponent();
-
+	void InitValue();
 	float ApplyDamage(const float Damage);
 
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetStamina() const { return Attributes.Stamina; }
 
+	void SetHealth(const float InHealth);
+
 	FORCEINLINE float GetMaxHealth() const { return Attributes.MaxHealth; }
 	FORCEINLINE float GetMaxStamina() const { return Attributes.MaxStamina; }
 
 protected:
-	virtual void BeginPlay() override;
 	virtual void InitializeComponent() override;
+
+	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void SetHealth(const float InHealth);
 	FORCEINLINE void SetStamina(const float InStamina) { Attributes.Stamina = FMath::Clamp<float>(InStamina, 0.0f, Attributes.MaxStamina); }
 
 	UFUNCTION()

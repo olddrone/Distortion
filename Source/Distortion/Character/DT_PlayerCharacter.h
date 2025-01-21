@@ -16,16 +16,17 @@ class DISTORTION_API ADT_PlayerCharacter : public ADT_BaseCharacter
 
 public:
 	ADT_PlayerCharacter();
-	virtual void PossessedBy(AController* NewController) override;
 
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
 	virtual void Dead() override;
 
 protected:
-	// virtual void BeginPlay() override;
-	void InitAttributeComp();
+	void Respawn();
 
+	void InitController();
+	void InitAttributeComp();
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> SpringArmComponent;

@@ -17,7 +17,6 @@ class DISTORTION_API ADT_PlayerState : public APlayerState
 	
 public:
 	ADT_PlayerState();
-
 	UDT_AttributeComponent* GetAttributes() const { return Attributes; }
 
 protected:

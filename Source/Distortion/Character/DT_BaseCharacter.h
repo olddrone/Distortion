@@ -66,7 +66,6 @@ public:
 	virtual void RMB(bool bHoldRotationYaw);
 
 protected:
-
 	UPROPERTY(ReplicatedUsing = OnRep_RMBDown)
 	bool bRMBDown = false;
 
@@ -131,8 +130,6 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
 
 public:
 	void Guard(const FName& SectionName);

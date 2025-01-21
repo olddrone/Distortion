@@ -11,24 +11,6 @@ ADT_PlayerController::ADT_PlayerController()
 {
 }
 
-void ADT_PlayerController::DisableInput(APlayerController* PlayerController)
-{
-	Super::DisableInput(PlayerController);
-}
-
-void ADT_PlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if (Subsystem)
-		Subsystem->AddMappingContext(InputData->MappingContext, 0);
-
-	PlayerCharacter = Cast<ADT_PlayerCharacter>(GetCharacter());
-	if (IsValid(PlayerCharacter))
-		StateInterface = Cast<IDT_StateInterface>(PlayerCharacter);
-}
-
 void ADT_PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -50,6 +32,29 @@ void ADT_PlayerController::SetupInputComponent()
 
 	EIC->BindAction(InputData->EquipAction, ETriggerEvent::Started, this, &ADT_PlayerController::Equip);
 
+}
+
+void ADT_PlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	Init(); // 리슨 서버
+}
+
+void ADT_PlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+	Init(); // 클라
+}
+
+void ADT_PlayerController::Init()
+{
+	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	if (Subsystem)
+		Subsystem->AddMappingContext(InputData->MappingContext, 0);
+
+	PlayerCharacter = Cast<ADT_PlayerCharacter>(GetCharacter());
+	if (IsValid(PlayerCharacter))
+		StateInterface = Cast<IDT_StateInterface>(PlayerCharacter);
 }
 
 void ADT_PlayerController::Move(const FInputActionValue& InputActionValue)
