@@ -37,6 +37,7 @@ void ADT_PlayerController::SetupInputComponent()
 void ADT_PlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+	
 	Init(); // ¸®½¼ ¼­¹ö
 }
 
@@ -48,6 +49,7 @@ void ADT_PlayerController::OnRep_Pawn()
 
 void ADT_PlayerController::Init()
 {
+	EnableInput(this);
 	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	if (Subsystem)
 		Subsystem->AddMappingContext(InputData->MappingContext, 0);

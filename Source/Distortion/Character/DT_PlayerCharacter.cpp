@@ -46,10 +46,12 @@ void ADT_PlayerCharacter::Dead()
 {
 	Super::Dead();
 	
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-		PlayerController->DisableInput(nullptr); // DisableInput(PlayerController);
-
+	if (IsLocallyControlled())
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		if (PlayerController)
+			PlayerController->DisableInput(nullptr); // DisableInput(PlayerController);
+	}
 	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
 }
