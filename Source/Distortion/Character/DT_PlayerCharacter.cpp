@@ -13,6 +13,7 @@
 #include "GameFramework/GameMode.h"
 #include "TimerManager.h"
 #include "Interface/DT_RespawnInterface.h"
+#include "Interface/DT_CameraShakeInterface.h"
 
 ADT_PlayerCharacter::ADT_PlayerCharacter()
 {
@@ -26,6 +27,7 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+
 }
 
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
@@ -40,6 +42,17 @@ void ADT_PlayerCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	InitAttributeComp(); // Å¬¶ó
+}
+
+void ADT_PlayerCharacter::Hit(const FName& SectionName)
+{
+	Super::Hit(SectionName);
+	
+	if (IsLocallyControlled())
+	{
+		IDT_CameraShakeInterface* Interface = Cast<IDT_CameraShakeInterface>(GetController());
+		Interface->DoHitCameraShake();
+	}
 }
 
 void ADT_PlayerCharacter::Dead()

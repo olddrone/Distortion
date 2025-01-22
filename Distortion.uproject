@@ -12,7 +12,8 @@
 				"Engine",
 				"CoreUObject",
 				"ModelViewViewModel",
-				"UMG"
+				"UMG",
+				"GameplayCameras"
 			]
 		}
 	],

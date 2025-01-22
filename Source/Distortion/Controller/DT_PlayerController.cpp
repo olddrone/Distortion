@@ -9,6 +9,7 @@
 
 ADT_PlayerController::ADT_PlayerController()
 {
+	PlayerCameraManager = Cast<APlayerCameraManager>(ADT_CameraManager::StaticClass());
 }
 
 void ADT_PlayerController::SetupInputComponent()
@@ -132,3 +133,9 @@ void ADT_PlayerController::SetZoom(const bool& bIsZoom)
 	}
 }
 
+void ADT_PlayerController::DoHitCameraShake()
+{
+	ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
+	if (CameraManager)
+		CameraManager->DoHitCameraShake();
+}

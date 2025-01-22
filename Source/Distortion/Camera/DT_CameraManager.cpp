@@ -4,6 +4,13 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/DT_PlayerCharacter.h"
+#include "Camera/DT_LegacyCameraShake.h"
+
+ADT_CameraManager::ADT_CameraManager()
+{
+	HitShake = UDT_LegacyCameraShake::StaticClass();
+}
 
 void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 {
@@ -26,9 +33,14 @@ void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 		if (MoveComp->IsMovingOnGround())
 			OutVT.POV.Location += Offset;
 
-		///
 		const float ChangeFOV = (bIsZooming) ? ZoomedFOV : DefaultFOV;
 		TestFOV = FMath::FInterpTo(TestFOV, ChangeFOV, DeltaTime, ZoomInterpSpeed);
 		SetFOV(TestFOV);
 	}
 }
+
+void ADT_CameraManager::DoHitCameraShake()
+{
+	GetOwningPlayerController()->ClientStartCameraShake(HitShake);
+}
+

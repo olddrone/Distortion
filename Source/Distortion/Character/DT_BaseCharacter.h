@@ -37,7 +37,6 @@ public:
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
 	FORCEINLINE UDT_CombatComponent* GetCombatComponent() const { return CombatComp; }
 
-
 protected:
 	// virtual void BeginPlay() override;
 
@@ -60,7 +59,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bLMBDown = false;
-
 
 public:
 	UFUNCTION()
@@ -94,7 +92,7 @@ public:
 	void Dodge();
 
 	UFUNCTION()
-	void Hit(const FName& SectionName);
+	virtual void Hit(const FName& SectionName);
 
 	UFUNCTION()
 	void ImmediateRotate();

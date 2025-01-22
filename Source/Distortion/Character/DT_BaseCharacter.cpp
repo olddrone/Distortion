@@ -67,7 +67,7 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
 	if (IsLocallyControlled())
 		ServerRPCRMBDown(bHoldRotationYaw);
-	CombatComp->SetAimFactor(bRMBDown ? 0.58f : 0.f);
+	CombatComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;

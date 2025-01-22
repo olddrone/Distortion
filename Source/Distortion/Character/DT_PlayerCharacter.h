@@ -20,18 +20,20 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
+	virtual void Hit(const FName& SectionName) override;
+
 	virtual void Dead() override;
 
 protected:
 	void Respawn();
 
-	void InitController();
 	void InitAttributeComp();
+
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> SpringArmComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> CameraComponent;
 
 };

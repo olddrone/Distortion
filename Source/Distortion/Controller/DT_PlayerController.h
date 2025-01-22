@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Data/PDA_Input.h"
 #include "Interface/DT_StateInterface.h"
+#include "Interface/DT_CameraShakeInterface.h"
 #include "DT_PlayerController.generated.h"
 
 struct FInputActionValue;
@@ -14,12 +15,13 @@ struct FInputActionValue;
  * 
  */
 UCLASS()
-class DISTORTION_API ADT_PlayerController : public APlayerController
+class DISTORTION_API ADT_PlayerController : public APlayerController, public IDT_CameraShakeInterface
 {
 	GENERATED_BODY()
 public:
 	ADT_PlayerController();
 
+	virtual void DoHitCameraShake() override;
 protected:
 	// virtual void BeginPlay() override;
 

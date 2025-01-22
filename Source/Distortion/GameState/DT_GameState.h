@@ -14,10 +14,29 @@ class DISTORTION_API ADT_GameState : public AGameState
 {
 	GENERATED_BODY()
 public:
-	ADT_GameState();
+	// ADT_GameState();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_RedTeamScore();
+
+	UFUNCTION()
+	void OnRep_BlueTeamScore();
+
+	void RedTeamInc();
+
+	void BlueTeamInc();
 
 protected:
 	virtual void BeginPlay() override;
+
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore, VisibleAnywhere, BlueprintReadOnly)
+	uint8 RedTeamScore = 0;
+
+	UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore, VisibleAnywhere, BlueprintReadOnly)
+	uint8 BlueTeamScore = 0;
 
 private:
 	UPROPERTY(EditAnywhere, meta = (PrivateAllowAccess = "true"))
@@ -25,4 +44,6 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (PrivateAllowAccess = "true"))
 	uint32 PoolSize;
+
+
 };
