@@ -37,6 +37,7 @@ public:
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
 	FORCEINLINE UDT_CombatComponent* GetCombatComponent() const { return CombatComp; }
 
+
 protected:
 	// virtual void BeginPlay() override;
 
@@ -73,11 +74,10 @@ protected:
 	void OnRep_RMBDown();
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRotationYaw(bool bHoldRotationYaw);
+	void ServerRPCRMBDown(bool bRMB);
 
 	UFUNCTION()
 	void SetRotationYaw(bool bHoldRotationYaw);
-
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")

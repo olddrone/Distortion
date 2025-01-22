@@ -65,28 +65,22 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
-	bRMBDown = bHoldRotationYaw;
+	if (IsLocallyControlled())
+		ServerRPCRMBDown(bHoldRotationYaw);
 	CombatComp->SetAimFactor(bRMBDown ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
+}
 
-	// 해당 클라
-	SetRotationYaw(bRMBDown);
-	
-	if(GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
-		ServerSetRotationYaw(bRMBDown);
+void ADT_BaseCharacter::ServerRPCRMBDown_Implementation(bool bRMB)
+{
+	bRMBDown = bRMB;
+	SetRotationYaw(bRMBDown); // 서버에선 OnRep이 호출 안되므로 별도로 호출
 }
 
 void ADT_BaseCharacter::OnRep_RMBDown()
 {
-	// 멀티 캐스트
-	SetRotationYaw(bRMBDown);
-}
-
-void ADT_BaseCharacter::ServerSetRotationYaw_Implementation(bool bHoldRotationYaw)
-{
-	bRMBDown = bHoldRotationYaw;
 	SetRotationYaw(bRMBDown);
 }
 
