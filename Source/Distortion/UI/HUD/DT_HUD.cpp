@@ -31,7 +31,6 @@ void ADT_HUD::DrawHUD()
 		{
 			DrawCrosshair(HUDPackage.Center, ViewportCenter, FVector2D(0,0));
 
-			
 			DrawCrosshair(HUDPackage.Left, ViewportCenter, FVector2D(-SpreadScaled, 0));
 			DrawCrosshair(HUDPackage.Right, ViewportCenter, FVector2D(SpreadScaled, 0));
 			DrawCrosshair(HUDPackage.Top, ViewportCenter, FVector2D(0, -SpreadScaled));
@@ -49,4 +48,5 @@ void ADT_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVect
 	const float ScreenY = ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y;
 		
 	DrawTexture(Texture, ScreenX, ScreenY, TextureWidth, TextureHeight, 0, 0, 1, 1, FLinearColor::Green);
+
 }

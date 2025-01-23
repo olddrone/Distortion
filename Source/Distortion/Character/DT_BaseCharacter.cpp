@@ -38,7 +38,7 @@ void ADT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ADT_BaseCharacter, bRMBDown);
+	DOREPLIFETIME_CONDITION(ADT_BaseCharacter, bRMBDown, COND_SimulatedOnly);
 }
 
 void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionName)
@@ -65,13 +65,16 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
-	if (IsLocallyControlled())
-		ServerRPCRMBDown(bHoldRotationYaw);
+	bRMBDown = bHoldRotationYaw;
 	CombatComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
+
+	SetRotationYaw(bRMBDown);
+	ServerRPCRMBDown(bHoldRotationYaw);
 }
+
 
 void ADT_BaseCharacter::ServerRPCRMBDown_Implementation(bool bRMB)
 {
@@ -160,13 +163,21 @@ void ADT_BaseCharacter::MulticastRPCRotate_Implementation(const FQuat4d& Quat)
 
 void ADT_BaseCharacter::Equip()
 {
-	if (GetActionState() != EActionState::EAS_Unocuupied)
-		return;
-	if (!CombatComp->GetHasEquipWeapon())
+	if (GetActionState() != EActionState::EAS_Unocuupied || !CombatComp->GetHasEquipWeapon())
 		return;
 
 	SetActionState(EActionState::EAS_Equip);
 	CombatComp->EquipCheck();
+}
+
+void ADT_BaseCharacter::Reload()
+{
+	if (GetActionState() != EActionState::EAS_Unocuupied ||
+		!CombatComp->GetHasEquipWeapon() || GetEquipWeaponType() != EWeaponType::EWT_Gun)
+		return;
+
+	SetActionState(EActionState::EAS_Reload);
+	CombatComp->Reload();
 }
 
 void ADT_BaseCharacter::Attack()
@@ -262,7 +273,7 @@ void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibility
 void ADT_BaseCharacter::Dead()
 {
 	SetActionState(EActionState::EAS_Dead);
-	// GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	CombatComp->DestroyWeapon();
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));

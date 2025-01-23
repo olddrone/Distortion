@@ -52,4 +52,9 @@ UPDA_Input::UPDA_Input()
 		TEXT("/Game/Input/InputAction/IA_Equip.IA_Equip"));
 	if (IA_EquipRef.Succeeded())
 		EquipAction = IA_EquipRef.Object;
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_ReloadRef(
+		TEXT("/Game/Input/InputAction/IA_Reload.IA_Reload"));
+	if (IA_ReloadRef.Succeeded())
+		ReloadAction = IA_ReloadRef.Object;
 }

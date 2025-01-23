@@ -16,11 +16,6 @@ ADT_Gun::ADT_Gun()
 	MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
-void ADT_Gun::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 void ADT_Gun::SetFXVisibility(const bool bVisible)
 {

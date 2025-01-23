@@ -16,18 +16,20 @@ class DISTORTION_API ADT_PlayerCharacter : public ADT_BaseCharacter
 
 public:
 	ADT_PlayerCharacter();
-
+	virtual void RestoreState() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
 	virtual void Hit(const FName& SectionName) override;
 
 	virtual void Dead() override;
+	virtual void RMB(bool bHoldRotationYaw) override;
 
 protected:
 	void Respawn();
 
 	void InitAttributeComp();
+	void ReviseFOV(const bool bIsZoom);
 
 private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))

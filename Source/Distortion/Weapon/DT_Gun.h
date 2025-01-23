@@ -18,22 +18,32 @@ class DISTORTION_API ADT_Gun : public ADT_BaseWeapon, public IDT_GunInterface
 public:
 	ADT_Gun();
 
-	virtual void Tick(float DeltaTime) override;
+	// virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override { }
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override {
+		--Ammo;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), Ammo);
+	}
 	virtual void SetFXVisibility(const bool bVisible) override;
 
 	virtual FCrosshairsTextures GetCrosshairs() const override { return Crosshairs; }
 
 	virtual float GetAutoFireDelay() const override { return FireDelay; }
+	virtual UAnimMontage* GetReloadMontage() const override { return ReloadMontage; }
 
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAnimationAsset> FireAnimation;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> ReloadMontage;
 
 	UPROPERTY(EditAnywhere)
 	FCrosshairsTextures Crosshairs;
 
 	UPROPERTY(EditAnywhere)
 	float FireDelay = .15f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 Ammo = 30;
 };

@@ -13,7 +13,7 @@
 #include "GameFramework/GameMode.h"
 #include "TimerManager.h"
 #include "Interface/DT_RespawnInterface.h"
-#include "Interface/DT_CameraShakeInterface.h"
+#include "Interface/DT_CameraControlInterface.h"
 
 ADT_PlayerCharacter::ADT_PlayerCharacter()
 {
@@ -28,6 +28,12 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
 
+}
+
+void ADT_PlayerCharacter::RestoreState()
+{
+	Super::RestoreState(); 
+	ReviseFOV(bRMBDown);
 }
 
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
@@ -50,7 +56,7 @@ void ADT_PlayerCharacter::Hit(const FName& SectionName)
 	
 	if (IsLocallyControlled())
 	{
-		IDT_CameraShakeInterface* Interface = Cast<IDT_CameraShakeInterface>(GetController());
+		IDT_CameraControlInterface* Interface = Cast<IDT_CameraControlInterface>(GetController());
 		Interface->DoHitCameraShake();
 	}
 }
@@ -63,10 +69,16 @@ void ADT_PlayerCharacter::Dead()
 	{
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		if (PlayerController)
-			PlayerController->DisableInput(nullptr); // DisableInput(PlayerController);
+			PlayerController->DisableInput(nullptr); 
 	}
 	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
+}
+
+void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
+{
+	Super::RMB(bHoldRotationYaw);
+	ReviseFOV(bHoldRotationYaw);
 }
 
 void ADT_PlayerCharacter::Respawn()
@@ -89,5 +101,18 @@ void ADT_PlayerCharacter::InitAttributeComp()
 		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
 		if (IsValid(Hud))
 			Hud->InitOverlay(State, AttributeComp);
+	}
+}
+
+void ADT_PlayerCharacter::ReviseFOV(const bool bIsZoom)
+{
+	if (IsLocallyControlled())
+	{
+		IDT_CameraControlInterface* Interface = Cast<IDT_CameraControlInterface>(GetController());
+
+		if (GetEquipWeaponType() == EWeaponType::EWT_Gun)
+			Interface->SetZoom(bIsZoom);
+		else
+			Interface->SetZoom(false);
 	}
 }

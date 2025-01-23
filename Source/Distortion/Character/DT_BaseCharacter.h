@@ -106,6 +106,8 @@ public:
 	UFUNCTION()
 	void Equip();
 
+	UFUNCTION()
+	void Reload();
 public:
 	virtual void DoAttack(const FName& SectionName = "Attack01") override;
 	virtual void ActivateCollision(const FDamagePacket& DamagePacket) override;

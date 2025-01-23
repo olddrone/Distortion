@@ -67,6 +67,14 @@ public:
 	void MulticastRPCEquip(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType);
 
 	UFUNCTION()
+	void Reload();
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCReload();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCReload();
+
+
+	UFUNCTION()
 	void AttachSocket(const FName& SocketName) {
 		if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 			ServerRPCAttachSocket(SocketName); 
@@ -76,6 +84,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCAttachSocket(const FName& SocketName);
 
+	void DestroyWeapon();
 public:
 	FORCEINLINE void SetEquipWeapon(const bool InEquipWeapon) { bEquipWeapon = InEquipWeapon; }
 	FORCEINLINE bool GetEquipWeapon() const { return bEquipWeapon; }

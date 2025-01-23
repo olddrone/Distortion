@@ -23,5 +23,6 @@ class DISTORTION_API IDT_GunInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual float GetAutoFireDelay() const = 0;
+	virtual UAnimMontage* GetReloadMontage() const = 0;
 
 };

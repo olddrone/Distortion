@@ -43,8 +43,11 @@ void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	/*
 	if (GetEquipWeapon())
 		SetHUDCrosshairs(DeltaTime);
+	*/
+	SetHUDCrosshairs(DeltaTime);
 }
 
 void UDT_CombatComponent::BeginPlay()
@@ -74,6 +77,30 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 		if (Hud)
 		{
 			FCrosshairsTextures Textures;
+
+			if (GetEquipWeapon())
+			{
+				Textures = Weapon->GetCrosshairs();
+				FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
+				FVector2D VelocityMultiplierRange(0, 1);
+
+				const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
+
+				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
+
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
+				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
+
+				Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+			}
+
+			Hud->SetHUDPackage(Textures);
+
+		}
+		/*if (Hud)
+		{
+			FCrosshairsTextures Textures;
 			Textures = Weapon->GetCrosshairs();
 			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
 			FVector2D VelocityMultiplierRange(0, 1);
@@ -90,8 +117,15 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 			Hud->SetHUDPackage(Textures);
 
-		}
+		}*/
 	}
+}
+
+void UDT_CombatComponent::DestroyWeapon()
+{
+	WeaponData = nullptr;
+	if (Weapon)
+		Weapon->Destroy();
 }
 
 UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
@@ -170,6 +204,23 @@ void UDT_CombatComponent::MulticastRPCEquip_Implementation(const bool bIsEquip, 
 	CombatInterface->PlayMontage(WeaponData->EquipMontage, SectionName);
 }
 
+void UDT_CombatComponent::Reload()
+{
+	ServerRPCReload();
+}
+
+void UDT_CombatComponent::ServerRPCReload_Implementation()
+{
+	MulticastRPCReload();
+}
+
+void UDT_CombatComponent::MulticastRPCReload_Implementation()
+{
+	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
+	if (Interface)
+		CombatInterface->PlayMontage(Interface->GetReloadMontage());
+}
+
 void UDT_CombatComponent::ServerRPCAttachSocket_Implementation(const FName& SocketName)
 {
 	MulticastRPCAttachSocket(SocketName);
@@ -211,9 +262,7 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 void UDT_CombatComponent::CollisionEnd()
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
-	{
 		ServerRPCCollisionEnd();
-	}
 }
 
 void UDT_CombatComponent::MulticastRPCShowCosmetic_Implementation(const bool bIsShow)

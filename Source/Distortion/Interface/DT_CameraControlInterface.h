@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DT_CameraShakeInterface.generated.h"
+#include "DT_CameraControlInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDT_CameraShakeInterface : public UInterface
+class UDT_CameraControlInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,10 +16,11 @@ class UDT_CameraShakeInterface : public UInterface
 /**
  * 
  */
-class DISTORTION_API IDT_CameraShakeInterface
+class DISTORTION_API IDT_CameraControlInterface
 {
 	GENERATED_BODY()
 
 public:
 	virtual void DoHitCameraShake() = 0;
+	virtual void SetZoom(const bool& bIsZoom) = 0;
 };

@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Data/PDA_Input.h"
 #include "Interface/DT_StateInterface.h"
-#include "Interface/DT_CameraShakeInterface.h"
+#include "Interface/DT_CameraControlInterface.h"
 #include "DT_PlayerController.generated.h"
 
 struct FInputActionValue;
@@ -15,7 +15,7 @@ struct FInputActionValue;
  * 
  */
 UCLASS()
-class DISTORTION_API ADT_PlayerController : public APlayerController, public IDT_CameraShakeInterface
+class DISTORTION_API ADT_PlayerController : public APlayerController, public IDT_CameraControlInterface
 {
 	GENERATED_BODY()
 public:
@@ -45,9 +45,10 @@ private:
 	void LMBEnd();
 
 	void Equip();
+	void Reload();
 
 private:
-	void SetZoom(const bool& bIsZoom);
+	virtual void SetZoom(const bool& bIsZoom) override;
 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))

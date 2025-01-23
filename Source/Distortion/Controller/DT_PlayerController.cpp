@@ -33,6 +33,8 @@ void ADT_PlayerController::SetupInputComponent()
 
 	EIC->BindAction(InputData->EquipAction, ETriggerEvent::Started, this, &ADT_PlayerController::Equip);
 
+	EIC->BindAction(InputData->ReloadAction, ETriggerEvent::Started, this, &ADT_PlayerController::Reload);
+
 }
 
 void ADT_PlayerController::OnPossess(APawn* InPawn)
@@ -99,13 +101,11 @@ void ADT_PlayerController::Crouch()
 void ADT_PlayerController::RMBStart()
 {
 	PlayerCharacter->RMB(true);
-	SetZoom(true);
 }
 
 void ADT_PlayerController::RMBEnd()
 {
 	PlayerCharacter->RMB(false);
-	SetZoom(false);
 }
 
 void ADT_PlayerController::LMBStart()
@@ -123,14 +123,16 @@ void ADT_PlayerController::Equip()
 	PlayerCharacter->Equip();
 }
 
+void ADT_PlayerController::Reload()
+{
+	PlayerCharacter->Reload();
+}
+
 void ADT_PlayerController::SetZoom(const bool& bIsZoom)
 {
-	if (StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
-	{
-		ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
-		if (CameraManager)
-			CameraManager->SetZoomState(bIsZoom);
-	}
+	ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
+	if (CameraManager)
+		CameraManager->SetZoomState(bIsZoom);
 }
 
 void ADT_PlayerController::DoHitCameraShake()

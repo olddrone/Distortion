@@ -12,6 +12,8 @@ ADT_ProjectileGun::ADT_ProjectileGun()
 
 void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
 {
+	Super::Attack(DamagePacket, TraceHitTarget);
+
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(GetMeshComp());
 	const USkeletalMeshSocket* MuzzleFlashSocket = Mesh->GetSocketByName(FName("MuzzleFlash"));
