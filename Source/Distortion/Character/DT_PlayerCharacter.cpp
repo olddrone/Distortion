@@ -27,7 +27,6 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
-
 }
 
 void ADT_PlayerCharacter::RestoreState()
@@ -50,9 +49,9 @@ void ADT_PlayerCharacter::OnRep_PlayerState()
 	InitAttributeComp(); // Å¬¶ó
 }
 
-void ADT_PlayerCharacter::Hit(const FName& SectionName)
+void ADT_PlayerCharacter::Hit(const FName& SectionName, const EAttackType& AttackType)
 {
-	Super::Hit(SectionName);
+	Super::Hit(SectionName, AttackType);
 	
 	if (IsLocallyControlled())
 	{

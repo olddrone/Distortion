@@ -12,6 +12,7 @@
 #include "DT_CombatComponent.generated.h"
 
 class UAnimMontage;
+class ADT_BaseWeapon;
 class UDT_CollisionManager;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -49,11 +50,11 @@ public:
 	void MulticastRPCShowCosmetic(const bool bIsShow);
 
 	UFUNCTION()
-	void Hit(const FName& SectionName = "Fwd") { ServerRPCHit(SectionName); }
+	void Hit(const FName& SectionName, const EAttackType& AttackType) { ServerRPCHit(SectionName, AttackType); }
 	UFUNCTION(Server, Unreliable)
-	void ServerRPCHit(const FName& Section);
+	void ServerRPCHit(const FName& Section, const EAttackType& AttackType);
 	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCHit(const FName& Section);
+	void MulticastRPCHit(const FName& Section, const EAttackType& AttackType);
 
 	void CreateWeapon(UDataAsset* DataAsset);
 
@@ -108,6 +109,9 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> SmallHitMontage;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

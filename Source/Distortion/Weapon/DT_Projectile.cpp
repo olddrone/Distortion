@@ -8,7 +8,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Interface/DT_CombatInterface.h"
-#include "Data/DT_DamageData.h"
 
 ADT_Projectile::ADT_Projectile()
 {
@@ -27,6 +26,8 @@ ADT_Projectile::ADT_Projectile()
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->bSimulationEnabled = false;
 
+	BulletPacket.AttackDirection = EAttackDirection::EAD_Shot;
+	BulletPacket.AttackType = EAttackType::EAT_Bullet;
 }
 
 void ADT_Projectile::BeginPlay()
@@ -98,14 +99,11 @@ void ADT_Projectile::MulitcastRPCShowTrace_Implementation()
 void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	///
-	FDamagePacket TestPacket;
-	TestPacket.AttackDirection = EAttackDirection::EAD_Shot;
-	TestPacket.AttackType = EAttackType::EAT_Bullet;
-	///
+	float FinalDamage = (Hit.BoneName == "Head") ? Damage * 2.f : Damage;
+	
 	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
 	if (VictimInterface)
-		VictimInterface->GetHit(StartLocation, Damage, TestPacket);
+		VictimInterface->GetHit(StartLocation, FinalDamage, BulletPacket);
 
 	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 	PoolSubSystem->ReturnToPool(this);

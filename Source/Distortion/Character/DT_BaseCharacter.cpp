@@ -121,14 +121,6 @@ void ADT_BaseCharacter::Dodge()
 	}
 }
 
-void ADT_BaseCharacter::Hit(const FName& SectionName)
-{
-	if (GetActionState() == EActionState::EAS_Dead)
-		return;
-	SetActionState(EActionState::EAS_Hit);
-	CombatComp->Hit(SectionName);
-}
-
 void ADT_BaseCharacter::ImmediateRotate()
 {
 	// 오른쪽이면 cos, 왼쪽이면 acos로 바꿔야
@@ -182,6 +174,7 @@ void ADT_BaseCharacter::Reload()
 
 void ADT_BaseCharacter::Attack()
 {
+	// 몽타주 섹션도 CombatComp에서 나누는 게
 	FName SectionName; 
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		SectionName = "Attack01";
@@ -239,8 +232,17 @@ void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize
 
 		(bRMBDown && GetEquipWeaponType() == EWeaponType::EWT_Sword && Section != "Bwd")
 			? Guard(UDT_CustomLibrary::CheckSectionName_Guard(Section, (uint8)DamagePacket.AttackDirection))
-			: Hit(Section);			
+			: Hit(Section, DamagePacket.AttackType);
 	}
+}
+
+void ADT_BaseCharacter::Hit(const FName& SectionName, const EAttackType& AttackType)
+{
+	if (GetActionState() == EActionState::EAS_Dead)
+		return;
+	SetActionState(EActionState::EAS_Hit);
+
+	CombatComp->Hit(SectionName, AttackType);
 }
 
 void ADT_BaseCharacter::Interaction(UDataAsset* DataAsset)

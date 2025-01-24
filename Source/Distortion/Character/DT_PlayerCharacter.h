@@ -20,7 +20,7 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
-	virtual void Hit(const FName& SectionName) override;
+	virtual void Hit(const FName& SectionName, const EAttackType& AttackType) override;
 
 	virtual void Dead() override;
 	virtual void RMB(bool bHoldRotationYaw) override;

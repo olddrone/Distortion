@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Data/DT_DamageData.h"
 #include "Interface/DT_ObjectPooledInterface.h"
 #include "DT_Projectile.generated.h"
 
@@ -57,4 +58,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float Damage = 10.f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	FDamagePacket BulletPacket;
 };

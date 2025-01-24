@@ -36,17 +36,17 @@ UDT_CombatComponent::UDT_CombatComponent()
 	if (HitRef.Object)
 		HitMontage = HitRef.Object;
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> SmallHitRef(
+		TEXT("/Game/Blueprints/Player/Animations/AM_SmallHit.AM_SmallHit"));
+	if (SmallHitRef.Object)
+		SmallHitMontage = SmallHitRef.Object;
+
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
 void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	/*
-	if (GetEquipWeapon())
-		SetHUDCrosshairs(DeltaTime);
-	*/
 	SetHUDCrosshairs(DeltaTime);
 }
 
@@ -94,30 +94,9 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 				Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
 			}
-
 			Hud->SetHUDPackage(Textures);
 
 		}
-		/*if (Hud)
-		{
-			FCrosshairsTextures Textures;
-			Textures = Weapon->GetCrosshairs();
-			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
-			FVector2D VelocityMultiplierRange(0, 1);
-
-			const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
-
-			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
-			CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
-
-			CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
-			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
-
-			Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
-
-			Hud->SetHUDPackage(Textures);
-
-		}*/
 	}
 }
 
@@ -163,14 +142,15 @@ void UDT_CombatComponent::MulticastRPCDodge_Implementation(const FName& Section)
 	CombatInterface->PlayMontage(DodgeMontage, Section);
 }
 
-void UDT_CombatComponent::ServerRPCHit_Implementation(const FName& Section)
+void UDT_CombatComponent::ServerRPCHit_Implementation(const FName& Section, const EAttackType& AttackType)
 {
-	MulticastRPCHit(Section);
+	MulticastRPCHit(Section,AttackType);
 }
 
-void UDT_CombatComponent::MulticastRPCHit_Implementation(const FName& Section)
+void UDT_CombatComponent::MulticastRPCHit_Implementation(const FName& Section, const EAttackType& AttackType)
 {
-	CombatInterface->PlayMontage(HitMontage, Section);
+	UAnimMontage* PlayMontage = (AttackType == EAttackType::EAT_Bullet) ? SmallHitMontage : HitMontage;
+	CombatInterface->PlayMontage(PlayMontage, Section);
 }
 
 void UDT_CombatComponent::CreateWeapon(UDataAsset* DataAsset)

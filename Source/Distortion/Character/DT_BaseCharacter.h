@@ -92,7 +92,7 @@ public:
 	void Dodge();
 
 	UFUNCTION()
-	virtual void Hit(const FName& SectionName);
+	virtual void Hit(const FName& SectionName, const EAttackType& AttackType);
 
 	UFUNCTION()
 	void ImmediateRotate();
@@ -129,7 +129,6 @@ public:
 
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAnimTickOption(const EVisibilityBasedAnimTickOption& AnimTickOption);
-
 
 public:
 	void Guard(const FName& SectionName);
