@@ -20,16 +20,16 @@ public:
 
 	// virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override {
-		--Ammo;
-		UE_LOG(LogTemp, Warning, TEXT("%d"), Ammo);
-	}
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override;
+	
 	virtual void SetFXVisibility(const bool bVisible) override;
 
 	virtual FCrosshairsTextures GetCrosshairs() const override { return Crosshairs; }
 
 	virtual float GetAutoFireDelay() const override { return FireDelay; }
 	virtual UAnimMontage* GetReloadMontage() const override { return ReloadMontage; }
+protected:
+	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
 
 protected:
 	UPROPERTY(EditAnywhere)

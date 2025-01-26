@@ -7,8 +7,6 @@
 
 ADT_Gun::ADT_Gun()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 
 	SetRootComponent(MeshComponent);
@@ -16,6 +14,12 @@ ADT_Gun::ADT_Gun()
 	MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
+void ADT_Gun::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
+{
+	if (!CanFire())
+		return;
+	--Ammo;
+}
 
 void ADT_Gun::SetFXVisibility(const bool bVisible)
 {

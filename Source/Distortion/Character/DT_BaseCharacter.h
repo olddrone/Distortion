@@ -27,6 +27,7 @@ public:
 
 	virtual EActionState GetActionState() const override { return ActionState; }
 	virtual void SetActionState(const EActionState& State) override { ActionState = State; }
+	// 이걸 수정해야 할듯? Controller의 bool값을 받아와서
 	virtual void RestoreState() override { if (GetEquipWeaponType() != EWeaponType::EWT_Gun) RMB(bRMBDown); }
 	virtual void SetEquipWeaponType(const EWeaponType& WeaponType) override { EquipWeaponType = WeaponType; }
 	virtual EWeaponType GetEquipWeaponType() const override { return EquipWeaponType; }
@@ -65,17 +66,24 @@ public:
 	virtual void RMB(bool bHoldRotationYaw);
 
 protected:
-	UPROPERTY(ReplicatedUsing = OnRep_RMBDown)
+// 	UPROPERTY(ReplicatedUsing = OnRep_RMBDown)
+	UPROPERTY(Replicated)
 	bool bRMBDown = false;
 
-	UFUNCTION()
-	void OnRep_RMBDown();
+	//UFUNCTION()
+	//void OnRep_RMBDown();
 
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCRMBDown(bool bRMB);
 
 	UFUNCTION()
-	void SetRotationYaw(bool bHoldRotationYaw);
+	void SetRotationYaw(bool bHoldRotationYaw) { ServerRPCSetRotationYaw(bHoldRotationYaw); }
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCSetRotationYaw(bool bHoldRotationYaw);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCSetRotationYaw(bool bHoldRotationYaw);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")

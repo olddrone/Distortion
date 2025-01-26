@@ -66,28 +66,27 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 {
 	bRMBDown = bHoldRotationYaw;
+	if(IsLocallyControlled())
+		ServerRPCRMBDown(bHoldRotationYaw);
 	CombatComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unocuupied)
 		return;
 
 	SetRotationYaw(bRMBDown);
-	ServerRPCRMBDown(bHoldRotationYaw);
 }
-
 
 void ADT_BaseCharacter::ServerRPCRMBDown_Implementation(bool bRMB)
 {
 	bRMBDown = bRMB;
-	SetRotationYaw(bRMBDown); // 서버에선 OnRep이 호출 안되므로 별도로 호출
 }
 
-void ADT_BaseCharacter::OnRep_RMBDown()
+void ADT_BaseCharacter::ServerRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
-	SetRotationYaw(bRMBDown);
+	MulticastRPCSetRotationYaw(bHoldRotationYaw);
 }
 
-void ADT_BaseCharacter::SetRotationYaw(bool bHoldRotationYaw)
+void ADT_BaseCharacter::MulticastRPCSetRotationYaw_Implementation(bool bHoldRotationYaw)
 {
 	bUseControllerRotationYaw = bHoldRotationYaw;
 	GetCharacterMovement()->bOrientRotationToMovement = !bHoldRotationYaw;
@@ -229,7 +228,7 @@ void ADT_BaseCharacter::ClientRPCGetHit_Implementation(const FVector_NetQuantize
 		FVector ToInstigator = (InstigatorLocation - GetActorLocation()).GetSafeNormal();
 		float Theta = UDT_CustomLibrary::CalculateTheta(Forward, ToInstigator);
 		FName Section = UDT_CustomLibrary::CheckSectionName_4Direction(Theta);
-
+		
 		(bRMBDown && GetEquipWeaponType() == EWeaponType::EWT_Sword && Section != "Bwd")
 			? Guard(UDT_CustomLibrary::CheckSectionName_Guard(Section, (uint8)DamagePacket.AttackDirection))
 			: Hit(Section, DamagePacket.AttackType);
