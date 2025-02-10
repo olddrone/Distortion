@@ -30,7 +30,7 @@ private:
 	float CrouchBlendTime;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	float ZoomedFOV = 45.0f;
+	float ZoomedFOV = 30.0f;
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed = 20.0f;
 

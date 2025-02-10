@@ -27,7 +27,8 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
-		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnedActor);
+		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), 
+			TargetRotation, SpawnedActor, GetOwner());
 
 	}
 }

@@ -4,7 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Library/DT_CustomLibrary.h"
 #include "Interface/DT_CombatInterface.h"
-#include "PlayerState/DT_PlayerState.h"
+#include "Library/DT_CustomLibrary.h"
 
 UDT_CollisionManager::UDT_CollisionManager()
 {
@@ -50,9 +50,10 @@ void UDT_CollisionManager::TraceCheck()
 	BeforePoints = { CurStart, CurEnd };
 }
 
+
 void UDT_CollisionManager::DoDamage(const FHitResult& Victim)
 {
-	if (SameTeamCheck(Cast<APawn>(Victim.GetActor())))
+	if (UDT_CustomLibrary::SameTeamCheck(Pawn, Cast<APawn>(Victim.GetActor())))
 		return;
 
 	// FVector = 72Bit, FVector_NetQuantize = 60Bit
@@ -130,11 +131,4 @@ void UDT_CollisionManager::PerformInterpolatedTraces(const FVector& PreStart, co
 
 		DoLineTrace(StartLocation, EndLocation, HitResults, FColor::Yellow);
 	}
-}
-
-bool UDT_CollisionManager::SameTeamCheck(APawn* Victim)
-{
-	ADT_PlayerState* OwnerState = Pawn->GetPlayerState<ADT_PlayerState>();
-	ADT_PlayerState* VitimState = Victim->GetPlayerState<ADT_PlayerState>();
-	return OwnerState->GetTeam() == VitimState->GetTeam();
 }

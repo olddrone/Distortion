@@ -86,6 +86,9 @@ public:
 	void MulticastRPCAttachSocket(const FName& SocketName);
 
 	void DestroyWeapon();
+
+	FORCEINLINE float GetWeaponCost() const { return (GetEquipWeapon()) ? WeaponData->AttackCost : 10.f; }
+
 public:
 	FORCEINLINE void SetEquipWeapon(const bool InEquipWeapon) { bEquipWeapon = InEquipWeapon; }
 	FORCEINLINE bool GetEquipWeapon() const { return bEquipWeapon; }

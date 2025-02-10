@@ -44,15 +44,13 @@ private:
 		const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPoint,
 		TArray<FHitResult>& HitResults);
 
-	bool SameTeamCheck(APawn* Victim);
-
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> HitActors;
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> ActorsToIgnore;
 	FTimerHandle Handle;
-	float InRate = 0.034f;		// 1frame == 0.017f
+	const float InRate = 0.034f;		// 1frame == 0.017f
 	FDamagePacket DamagePacket;
 
 	TPair<FVector, FVector> BeforePoints = { FVector::ZeroVector,FVector::ZeroVector };

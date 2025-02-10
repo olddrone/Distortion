@@ -25,9 +25,10 @@ void UDT_PoolSubSystem::InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxS
     }
 }
 
-void UDT_PoolSubSystem::SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation, AActor*& SpawnedActor)
+void UDT_PoolSubSystem::SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, 
+    const FRotator& Rotation, AActor* SpawnedActor, AActor* Owner)
 {
-    SpawnedActor = GetActorFromPool(PoolClass, Location, Rotation);
+    SpawnedActor = GetActorFromPool(PoolClass, Location, Rotation, Owner);
 }
 
 void UDT_PoolSubSystem::ReturnToPool(AActor* Poolable)
@@ -42,6 +43,7 @@ void UDT_PoolSubSystem::ReturnToPool(AActor* Poolable)
         Poolable->SetActorHiddenInGame(true);
         Poolable->SetActorEnableCollision(false);
         Poolable->SetActorTickEnabled(false);
+        Poolable->SetOwner(nullptr); 
 
         IDT_ObjectPooledInterface* Interface = Cast<IDT_ObjectPooledInterface>(Poolable);
         Interface->OnReturnToPool();
@@ -56,7 +58,8 @@ void UDT_PoolSubSystem::ReturnToPool(AActor* Poolable)
     }
 }
 
-AActor* UDT_PoolSubSystem::GetActorFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation)
+AActor* UDT_PoolSubSystem::GetActorFromPool(TSubclassOf<AActor> PoolClass,
+    const FVector_NetQuantize& Location, const FRotator& Rotation, AActor* Owner)
 {
     FPoolArray& ObjectPool = ObjectPools.FindOrAdd(PoolClass);
     if (!ObjectPool.IsEmpty())
@@ -66,6 +69,7 @@ AActor* UDT_PoolSubSystem::GetActorFromPool(TSubclassOf<AActor> PoolClass, const
         {
             Actor->SetActorLocationAndRotation(Location, Rotation);
             Actor->SetActorHiddenInGame(false);
+            Actor->SetOwner(Owner);
 
             IDT_ObjectPooledInterface* Interface = Cast<IDT_ObjectPooledInterface>(Actor);
             Interface->OnSpawnFromPool(Location, Rotation);

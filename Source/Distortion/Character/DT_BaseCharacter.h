@@ -26,7 +26,7 @@ public:
 	// virtual void Tick(float DeltaTime) override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }
-	virtual void SetActionState(const EActionState& State) override { ActionState = State; }
+	virtual void SetActionState(const EActionState& State) override; // { ActionState = State; }
 
 	virtual void RestoreState() override { if (GetEquipWeaponType() != EWeaponType::EWT_Gun) RMB(bRMBDown); }
 	virtual void SetEquipWeaponType(const EWeaponType& WeaponType) override { EquipWeaponType = WeaponType; }
@@ -53,7 +53,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	EActionState ActionState = EActionState::EAS_Unocuupied;
+	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EWeaponType EquipWeaponType = EWeaponType::EWT_Default;
@@ -143,4 +143,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TeamMaterials")
 	TObjectPtr<UMaterialInterface> BlueTeamMaterial;
+
+	bool HasEnoughStamina(const float& Cost);
 };

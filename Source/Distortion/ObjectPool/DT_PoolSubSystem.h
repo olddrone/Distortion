@@ -31,13 +31,15 @@ public:
     void InitializePool(TSubclassOf<AActor> PoolClass, int32 MaxSize);
 
     UFUNCTION()
-    void SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation, AActor*& SpawnedActor);
+    void SpawnFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, 
+        const FRotator& Rotation, AActor* SpawnedActor, AActor* Owner);
     
     UFUNCTION()
     void ReturnToPool(AActor* Poolable);
 
 private:
-    AActor* GetActorFromPool(TSubclassOf<AActor> PoolClass, const FVector_NetQuantize& Location, const FRotator& Rotation);
+    AActor* GetActorFromPool(TSubclassOf<AActor> PoolClass, 
+        const FVector_NetQuantize& Location, const FRotator& Rotation, AActor* Owner);
 
 private:
     UPROPERTY()

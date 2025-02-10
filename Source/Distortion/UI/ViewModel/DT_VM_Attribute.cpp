@@ -19,12 +19,18 @@ void UDT_VM_Attribute::BindCallbacks()
 	SetMaxHealth(Attributes->GetMaxHealth());
 	SetHealth(Attributes->GetHealth());
 	Attributes->HealthChange.AddUObject(this, &UDT_VM_Attribute::OnHealthChanged);
+	Attributes->StaminaChange.AddUObject(this, &UDT_VM_Attribute::OnStaminaChanged);
 
 	SetMaxStamina(Attributes->GetMaxStamina());
 	SetStamina(Attributes->GetStamina());
 }
 
-void UDT_VM_Attribute::OnHealthChanged(float NewHealth)
+void UDT_VM_Attribute::OnHealthChanged(const float InHealth)
 {
-	SetHealth(NewHealth);
+	SetHealth(InHealth);
+}
+
+void UDT_VM_Attribute::OnStaminaChanged(const float InStamina)
+{
+	SetStamina(InStamina);
 }

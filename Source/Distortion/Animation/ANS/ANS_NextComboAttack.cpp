@@ -17,7 +17,7 @@ void UANS_NextComboAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeq
 		{
 			if (StateInterface->GetLMBDown())
 			{
-				StateInterface->SetActionState(EActionState::EAS_Unocuupied);
+				StateInterface->SetActionState(EActionState::EAS_Unoccupied);
 				StateInterface->RestoreState();
 
 				IDT_CombatInterface* CombatInterface = Cast<IDT_CombatInterface>(MeshComp->GetOwner());

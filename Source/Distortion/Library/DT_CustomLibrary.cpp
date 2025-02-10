@@ -3,6 +3,7 @@
 #include "DT_CustomLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
+#include "PlayerState/DT_PlayerState.h"
 
 float UDT_CustomLibrary::CalculateTheta(const FVector& A, const FVector& B)
 {
@@ -70,4 +71,14 @@ FName UDT_CustomLibrary::CheckSectionName_Guard(const FName& HitDirection, const
 		Ret = "LT";
 
 	return Ret;
+}
+
+bool UDT_CustomLibrary::SameTeamCheck(const APawn* Instigator, const APawn* Victim)
+{
+	if (!IsValid(Instigator) || !IsValid(Victim))
+		return false;
+
+	ADT_PlayerState* InstigatorState = Instigator->GetPlayerState<ADT_PlayerState>();
+	ADT_PlayerState* VitimState = Victim->GetPlayerState<ADT_PlayerState>();
+	return InstigatorState->GetTeam() == VitimState->GetTeam();
 }

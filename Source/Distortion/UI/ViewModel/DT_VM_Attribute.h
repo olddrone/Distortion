@@ -53,7 +53,10 @@ protected:
     virtual void BindCallbacks();
 
     UFUNCTION()
-    void OnHealthChanged(float InHealth);
+    void OnHealthChanged(const float InHealth);
+
+    UFUNCTION()
+    void OnStaminaChanged(const float InStamina);
 
 protected:
     UPROPERTY()

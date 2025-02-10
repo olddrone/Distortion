@@ -36,4 +36,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	FName HolsterSocketName;
 
+	UPROPERTY(EditAnywhere)
+	float AttackCost;
 };

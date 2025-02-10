@@ -306,7 +306,7 @@ void UDT_CombatComponent::StartFireTimer()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]() {
 		if (StateInterface->GetLMBDown())
 		{
-			StateInterface->SetActionState(EActionState::EAS_Unocuupied);
+			StateInterface->SetActionState(EActionState::EAS_Unoccupied);
 			CombatInterface->DoAttack(StateInterface->GetRMBDown() ? "Ironsight" : "Hip");
 		}
 		}), Interface->GetAutoFireDelay(), false);

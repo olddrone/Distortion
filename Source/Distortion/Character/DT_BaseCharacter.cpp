@@ -34,13 +34,21 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
 }
 
+void ADT_BaseCharacter::SetActionState(const EActionState& State)
+{
+	ActionState = State;
+
+	if (ActionState == EActionState::EAS_Unoccupied)
+		AttributeComp->StartRegenTimer();
+	else
+		AttributeComp->StopRegenTimer();
+}
 
 void ADT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ADT_BaseCharacter, bRMBDown, COND_SimulatedOnly);
-	// DOREPLIFETIME(ADT_BaseCharacter, Color);
 }
 
 void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionName)
@@ -77,7 +85,7 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 		ServerRPCRMBDown(bHoldRotationYaw);
 	CombatComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
-	if (GetActionState() != EActionState::EAS_Unocuupied)
+	if (GetActionState() != EActionState::EAS_Unoccupied)
 		return;
 
 	SetRotationYaw(bRMBDown);
@@ -106,24 +114,25 @@ FTransform ADT_BaseCharacter::GetWeaponSocketTransform(const FName& SocketName) 
 
 void ADT_BaseCharacter::Dodge()
 {
-	if (GetActionState() != EActionState::EAS_Unocuupied)
+	if (GetActionState() != EActionState::EAS_Unoccupied || !HasEnoughStamina(20.f))
 		return;
 
 	SetActionState(EActionState::EAS_Dodge);
-	if (CombatComp)
+
+	if (IsLocallyControlled())
+		AttributeComp->UseStamina(20.f);
+
+	if (bRMBDown || GetEquipWeaponType() == EWeaponType::EWT_Gun)
 	{
-		if (bRMBDown || GetEquipWeaponType() == EWeaponType::EWT_Gun)
-		{
-			FVector ForwardVector = GetActorForwardVector();
-			FVector InputVector = GetLastMovementInputVector().GetSafeNormal();
-			float Theta = UDT_CustomLibrary::CalculateTheta(ForwardVector, { InputVector.X,InputVector.Y,0.f });
-			CombatComp->Dodge(UDT_CustomLibrary::CheckSectionName_8Direction(Theta));
-		}
-		else
-		{
-			ImmediateRotate();
-			CombatComp->Dodge();
-		}
+		FVector ForwardVector = GetActorForwardVector();
+		FVector InputVector = GetLastMovementInputVector().GetSafeNormal();
+		float Theta = UDT_CustomLibrary::CalculateTheta(ForwardVector, { InputVector.X,InputVector.Y,0.f });
+		CombatComp->Dodge(UDT_CustomLibrary::CheckSectionName_8Direction(Theta));
+	}
+	else
+	{
+		ImmediateRotate();
+		CombatComp->Dodge();
 	}
 }
 
@@ -161,7 +170,7 @@ void ADT_BaseCharacter::MulticastRPCRotate_Implementation(const FQuat4d& Quat)
 
 void ADT_BaseCharacter::Equip()
 {
-	if (GetActionState() != EActionState::EAS_Unocuupied || !CombatComp->GetHasEquipWeapon())
+	if (GetActionState() != EActionState::EAS_Unoccupied || !CombatComp->GetHasEquipWeapon())
 		return;
 
 	SetActionState(EActionState::EAS_Equip);
@@ -170,7 +179,7 @@ void ADT_BaseCharacter::Equip()
 
 void ADT_BaseCharacter::Reload()
 {
-	if (GetActionState() != EActionState::EAS_Unocuupied ||
+	if (GetActionState() != EActionState::EAS_Unoccupied ||
 		!CombatComp->GetHasEquipWeapon() || GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		return;
 
@@ -180,10 +189,13 @@ void ADT_BaseCharacter::Reload()
 
 void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 {
-	if (GetActionState() != EActionState::EAS_Unocuupied)
+	if (GetActionState() != EActionState::EAS_Unoccupied || !HasEnoughStamina(CombatComp->GetWeaponCost()))
 		return;
 
 	SetActionState(EActionState::EAS_Attack);
+
+	if (IsLocallyControlled())
+		AttributeComp->UseStamina(CombatComp->GetWeaponCost());
 
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		ImmediateRotate();
@@ -283,4 +295,9 @@ void ADT_BaseCharacter::SetTeamColor(const ETeam& Team)
 		GetMesh()->SetMaterial(0, RedTeamMaterial);
 	else if (Team == ETeam::ET_BlueTeam)
 		GetMesh()->SetMaterial(0, BlueTeamMaterial);
+}
+
+bool ADT_BaseCharacter::HasEnoughStamina(const float& Cost)
+{
+	return AttributeComp->GetStamina() >= Cost;
 }

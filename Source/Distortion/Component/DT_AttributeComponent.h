@@ -24,19 +24,20 @@ public:
 	float ApplyDamage(const float Damage);
 
 	FORCEINLINE float GetHealth() const { return Health; }
-	FORCEINLINE float GetStamina() const { return Attributes.Stamina; }
+	FORCEINLINE float GetStamina() const { return Stamina; }
 
-	void SetHealth(const float InHealth);
+	void SetHealth(const float& InHealth);
+	void SetStamina(const float& InStamina);
 
 	FORCEINLINE float GetMaxHealth() const { return Attributes.MaxHealth; }
 	FORCEINLINE float GetMaxStamina() const { return Attributes.MaxStamina; }
+
+	void UseStamina(const float& Cost);
 
 protected:
 	virtual void InitializeComponent() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	FORCEINLINE void SetStamina(const float InStamina) { Attributes.Stamina = FMath::Clamp<float>(InStamina, 0.0f, Attributes.MaxStamina); }
 
 	UFUNCTION()
 	void OnRep_Health();
@@ -50,7 +51,22 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Health, Transient, VisibleInstanceOnly)
 	float Health;
 
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float Stamina;
+
 	UPROPERTY(Transient, VisibleInstanceOnly, meta = (AllowPrivateAccess = "true"))
 	FDT_Attributes Attributes;
 
+public:
+	void StartRegenTimer();
+	void StopRegenTimer();
+
+private:
+	FTimerHandle RegenTimer;
+
+	void RegenStamina(); 
+
+	const float InRate = 0.034f;
+
+	FTimerHandle Handle;
 };

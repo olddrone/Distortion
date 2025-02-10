@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Interface/DT_CombatInterface.h"
+#include "Library/DT_CustomLibrary.h"
 
 ADT_Projectile::ADT_Projectile()
 {
@@ -99,12 +100,14 @@ void ADT_Projectile::MulitcastRPCShowTrace_Implementation()
 void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	float FinalDamage = (Hit.BoneName == "Head") ? Damage * 2.f : Damage;
-	
-	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
-	if (VictimInterface)
-		VictimInterface->GetHit(StartLocation, FinalDamage, BulletPacket);
+	if (!UDT_CustomLibrary::SameTeamCheck(Cast<APawn>(GetOwner()), Cast<APawn>(OtherActor)))
+	{
+		float FinalDamage = (Hit.BoneName == "Head") ? Damage * 2.f : Damage;
 
+		IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
+		if (VictimInterface)
+			VictimInterface->GetHit(StartLocation, FinalDamage, BulletPacket);
+	}
 	UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 	PoolSubSystem->ReturnToPool(this);
 }

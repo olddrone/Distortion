@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "DT_CustomLibrary.generated.h"
 
-
+class APawn;
 USTRUCT()
 struct FData
 {
@@ -26,4 +26,6 @@ public:
 	static FVector BezierCurve_Quadratic(const FVector& P0, const FVector& P1, const FVector& P2, float T);
 
 	static FName CheckSectionName_Guard(const FName& HitDirection, const uint8& AttackDirection);
+
+	static bool SameTeamCheck(const APawn* A, const APawn* B);
 };
