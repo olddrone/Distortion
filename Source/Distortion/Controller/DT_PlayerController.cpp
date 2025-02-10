@@ -60,6 +60,7 @@ void ADT_PlayerController::Init()
 	PlayerCharacter = Cast<ADT_PlayerCharacter>(GetCharacter());
 	if (IsValid(PlayerCharacter))
 		StateInterface = Cast<IDT_StateInterface>(PlayerCharacter);
+		
 }
 
 void ADT_PlayerController::Move(const FInputActionValue& InputActionValue)

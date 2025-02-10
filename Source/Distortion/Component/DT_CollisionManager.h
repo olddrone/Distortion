@@ -29,11 +29,8 @@ public:
 
 public:
 	FORCEINLINE void SetDamagePacket(const FDamagePacket& InPacket) { DamagePacket = InPacket; }
-	FORCEINLINE void SetCharacter(AActor* InCharacter) { Character = InCharacter; }
+	FORCEINLINE void SetOwner(APawn* InPawn) { Pawn = InPawn; }
 	FORCEINLINE void SetDamage(const float InDamage) { Damage = InDamage; }
-
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	void HandleHitResults(const TArray<FHitResult>& HitResults);
@@ -46,6 +43,9 @@ private:
 	void PerformInterpolatedTraces(const FVector& PreStart, const FVector& CurStart,
 		const FVector& PreEnd, const FVector& CurEnd, TPair<FVector, FVector>& CtrlPoint,
 		TArray<FHitResult>& HitResults);
+
+	bool SameTeamCheck(APawn* Victim);
+
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> HitActors;
@@ -57,7 +57,7 @@ private:
 
 	TPair<FVector, FVector> BeforePoints = { FVector::ZeroVector,FVector::ZeroVector };
 	
-	AActor* Character;
+	TObjectPtr<APawn> Pawn;
 	// TScriptInterface<class ILT_MeshInterface> MeshInterface;
 	IDT_MeshInterface* MeshInterface;
 

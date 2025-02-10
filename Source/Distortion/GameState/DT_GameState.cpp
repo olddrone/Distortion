@@ -21,8 +21,7 @@ void ADT_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 }
 
 void ADT_GameState::OnRep_RedTeamScore()
-{
-	/*
+{	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
 		GetWorld()->GetFirstPlayerController());
 	if (BPlayer)
@@ -31,8 +30,7 @@ void ADT_GameState::OnRep_RedTeamScore()
 }
 
 void ADT_GameState::OnRep_BlueTeamScore()
-{
-	/*
+{	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
 		GetWorld()->GetFirstPlayerController());
 	if (BPlayer)

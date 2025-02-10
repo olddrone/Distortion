@@ -13,6 +13,7 @@ UCLASS()
 class DISTORTION_API ADT_GameState : public AGameState
 {
 	GENERATED_BODY()
+	friend class ADT_GameMode;
 public:
 	// ADT_GameState();
 
@@ -45,5 +46,6 @@ private:
 	UPROPERTY(EditAnywhere, meta = (PrivateAllowAccess = "true"))
 	uint32 PoolSize;
 
-
+	TArray<APlayerState*> RedTeam;
+	TArray<APlayerState*> BlueTeam;
 };

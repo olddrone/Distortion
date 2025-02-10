@@ -27,4 +27,6 @@ public:
 
 	virtual bool GetLMBDown() const = 0;
 	virtual bool GetRMBDown() const = 0;
+
+	virtual void SetTeamColor(const ETeam& Team) = 0;
 };

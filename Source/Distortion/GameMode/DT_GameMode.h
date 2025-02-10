@@ -16,8 +16,9 @@ class DISTORTION_API ADT_GameMode : public AGameMode, public IDT_RespawnInterfac
 	GENERATED_BODY()
 
 public:
-
 	ADT_GameMode();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void RequestPlayerRespawn(ACharacter* Character, AController* Controller) override;
 
 };

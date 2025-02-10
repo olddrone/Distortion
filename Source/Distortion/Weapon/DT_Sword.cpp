@@ -56,7 +56,7 @@ void ADT_Sword::Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_Collision
 	CollisionManager = InCollisionManager;
 	if (Cast<APawn>(OwnerPawn)->IsLocallyControlled())
 	{
-		CollisionManager->SetCharacter(OwnerPawn);
+		CollisionManager->SetOwner(OwnerPawn);
 		CollisionManager->SetActorsToIgnore(OwnerPawn);
 		CollisionManager->SetActorsToIgnore(this);
 	}

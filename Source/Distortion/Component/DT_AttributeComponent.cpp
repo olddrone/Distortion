@@ -15,11 +15,6 @@ void UDT_AttributeComponent::InitValue()
 	SetStamina(Attributes.MaxStamina);
 }
 
-void UDT_AttributeComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void UDT_AttributeComponent::InitializeComponent()
 {
 	Super::InitializeComponent();

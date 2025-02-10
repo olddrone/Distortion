@@ -1,19 +1,13 @@
-
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DT_CollisionManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Library/DT_CustomLibrary.h"
 #include "Interface/DT_CombatInterface.h"
+#include "PlayerState/DT_PlayerState.h"
 
 UDT_CollisionManager::UDT_CollisionManager()
 {
-}
-
-void UDT_CollisionManager::BeginPlay()
-{
-	Super::BeginPlay();
-
 }
 
 void UDT_CollisionManager::DoCollision(AActor* Caller)
@@ -58,10 +52,11 @@ void UDT_CollisionManager::TraceCheck()
 
 void UDT_CollisionManager::DoDamage(const FHitResult& Victim)
 {
-	if (!Character)
+	if (SameTeamCheck(Cast<APawn>(Victim.GetActor())))
 		return;
+
 	// FVector = 72Bit, FVector_NetQuantize = 60Bit
-	FVector_NetQuantize InstigatorLocation = Character->GetActorLocation();
+	FVector_NetQuantize InstigatorLocation = Pawn->GetActorLocation();
 
 	IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(Victim.GetActor());
 	if (VictimInterface)
@@ -86,7 +81,7 @@ void UDT_CollisionManager::DoLineTrace(const FVector& StartLocation, const FVect
 	TArray<FHitResult> TempHitResults;
 	UKismetSystemLibrary::LineTraceMulti(GetWorld(), StartLocation, EndLocation,
 		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, TempHitResults, true, Color, FColor::Green, 0.5f);
+		EDrawDebugTrace::None, TempHitResults, true, Color, FColor::Green, 0.5f);
 	HitResults.Append(TempHitResults);
 }
 
@@ -95,7 +90,7 @@ void UDT_CollisionManager::DoSphereTrace(const FVector& Location, TArray<FHitRes
 	TArray<FHitResult> TempHitResults;
 	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Location,Location, 15.f,
 		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, TempHitResults, true, Color, FColor::Green, 0.5f);
+		EDrawDebugTrace::None, TempHitResults, true, Color, FColor::Green, 0.5f);
 	HitResults.Append(TempHitResults);
 }
 
@@ -135,4 +130,11 @@ void UDT_CollisionManager::PerformInterpolatedTraces(const FVector& PreStart, co
 
 		DoLineTrace(StartLocation, EndLocation, HitResults, FColor::Yellow);
 	}
+}
+
+bool UDT_CollisionManager::SameTeamCheck(APawn* Victim)
+{
+	ADT_PlayerState* OwnerState = Pawn->GetPlayerState<ADT_PlayerState>();
+	ADT_PlayerState* VitimState = Victim->GetPlayerState<ADT_PlayerState>();
+	return OwnerState->GetTeam() == VitimState->GetTeam();
 }

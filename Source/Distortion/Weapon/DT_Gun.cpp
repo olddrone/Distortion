@@ -5,7 +5,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 
-ADT_Gun::ADT_Gun()
+ADT_Gun::ADT_Gun() : Ammo(MaxAmmo)
 {
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 
@@ -13,17 +13,9 @@ ADT_Gun::ADT_Gun()
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
-
-void ADT_Gun::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget)
-{
-	if (!CanFire())
-		return;
-	--Ammo;
-}
-
 void ADT_Gun::SetFXVisibility(const bool bVisible)
 {
-	if (FireAnimation)
+	if (FireAnimation && bVisible)
 	{
 		USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(MeshComponent);
 		SkeletalMesh->PlayAnimation(FireAnimation, false);

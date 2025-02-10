@@ -53,7 +53,6 @@ void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	AActor* Owner = GetOwner();
 	if (IsValid(Owner))
 	{
@@ -61,10 +60,11 @@ void UDT_CombatComponent::BeginPlay()
 		MeshInterface = Cast<IDT_MeshInterface>(Owner);
 		StateInterface = Cast<IDT_StateInterface>(Owner);
 
-		CollisionManager->SetCharacter(Owner);
+		CollisionManager->SetOwner(Cast<APawn>(Owner));
 		CollisionManager->SetActorsToIgnore(Owner);
 	}
 }
+
 
 void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
@@ -116,6 +116,25 @@ FTransform UDT_CombatComponent::GetMeshSocketTransform(const FName& SocketName)
 {
 	USkeletalMeshComponent* MeshComp = Cast<USkeletalMeshComponent>(Weapon->GetMeshComp());
 	return MeshComp->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_World);
+}
+
+void UDT_CombatComponent::Attack(const FName& Section)
+{
+	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
+	if (Interface)
+	{
+		Interface->DecreaseAmmo();
+		if (Interface->GetAmmo() <= 0)
+		{
+			Reload();
+			return;
+		}
+	}
+
+	ServerRPCAttack(Section);
+
+	if (GetEquipWeapon() && StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
+		StartFireTimer();
 }
 
 void UDT_CombatComponent::ServerRPCAttack_Implementation(const FName& Section)
@@ -198,7 +217,10 @@ void UDT_CombatComponent::MulticastRPCReload_Implementation()
 {
 	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
 	if (Interface)
+	{
 		CombatInterface->PlayMontage(Interface->GetReloadMontage());
+		Interface->Load();
+	}
 }
 
 void UDT_CombatComponent::ServerRPCAttachSocket_Implementation(const FName& SocketName)
@@ -219,8 +241,6 @@ void UDT_CombatComponent::CollisionStart(const FDamagePacket& InDamagePacket)
 		TraceUnderCrosshairs(HitResult);
 		ServerRPCCollisionStart(InDamagePacket, HitResult.ImpactPoint);
 		CrosshairShootingFactor = .75f;
-		if (GetEquipWeapon() && StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
-			StartFireTimer(InDamagePacket);
 	}
 }
 
@@ -228,7 +248,7 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 {
 	if (GetEquipWeapon())
 	{
-		Weapon->Attack(DamagePacket, TraceHitTarget);
+		Weapon->Attack(DamagePacket, TraceHitTarget); // 서버에서 호출함
 		MulticastRPCShowCosmetic(true);
 	}
 	else
@@ -277,20 +297,20 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	}
 }
 
-void UDT_CombatComponent::StartFireTimer(const FDamagePacket DamagePacket)
+void UDT_CombatComponent::StartFireTimer()
 {
 	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
-	FTimerDelegate RespawnDelegate = FTimerDelegate::CreateUObject(this, &UDT_CombatComponent::FireTimerFinished, DamagePacket);
+	if (Interface->GetAmmo() <= 0)
+		return;
 
-	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandle, RespawnDelegate, Interface->GetAutoFireDelay(), false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]() {
+		if (StateInterface->GetLMBDown())
+		{
+			StateInterface->SetActionState(EActionState::EAS_Unocuupied);
+			CombatInterface->DoAttack(StateInterface->GetRMBDown() ? "Ironsight" : "Hip");
+		}
+		}), Interface->GetAutoFireDelay(), false);
 }
-
-void UDT_CombatComponent::FireTimerFinished(const FDamagePacket DamagePacket)
-{
-	if (StateInterface->GetLMBDown())
-		CollisionStart(DamagePacket);
-}
-
 
 void UDT_CombatComponent::ServerRPCCollisionEnd_Implementation()
 {

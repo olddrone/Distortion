@@ -25,7 +25,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-	void Attack(const FName& Section = "Attack01") { ServerRPCAttack(Section); }
+	void Attack(const FName& Section = "Attack01");
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCAttack(const FName& Section);
 	UFUNCTION(NetMulticast, Unreliable)
@@ -141,8 +141,7 @@ public:
 	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }
 	
 	FTimerHandle TimerHandle;
-	void StartFireTimer(const FDamagePacket InDamagePacket);
-	void FireTimerFinished(const FDamagePacket InDamagePacket);
+	void StartFireTimer();
 
 public:
 	UFUNCTION()

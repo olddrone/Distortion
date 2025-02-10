@@ -34,7 +34,6 @@ public:
 protected:
 	virtual void InitializeComponent() override;
 
-	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	FORCEINLINE void SetStamina(const float InStamina) { Attributes.Stamina = FMath::Clamp<float>(InStamina, 0.0f, Attributes.MaxStamina); }

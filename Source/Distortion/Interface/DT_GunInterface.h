@@ -24,5 +24,7 @@ class DISTORTION_API IDT_GunInterface
 public:
 	virtual float GetAutoFireDelay() const = 0;
 	virtual UAnimMontage* GetReloadMontage() const = 0;
-
+	virtual uint8 GetAmmo() const = 0;
+	virtual void Load() = 0;
+	virtual void DecreaseAmmo() = 0;
 };

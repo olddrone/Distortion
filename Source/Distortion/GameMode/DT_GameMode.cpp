@@ -7,7 +7,9 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerStart.h"
 
-#include "Character/DT_PlayerCharacter.h"
+#include "GameState/DT_GameState.h"
+#include "PlayerState/DT_PlayerState.h"
+
 ADT_GameMode::ADT_GameMode()
 {
 	/*
@@ -17,6 +19,29 @@ ADT_GameMode::ADT_GameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	
 	*/
+}
+
+void ADT_GameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	// 나중에 완성되면 인터페이스로
+	ADT_GameState* GS = Cast<ADT_GameState>(UGameplayStatics::GetGameState(this));
+	ADT_PlayerState* PS = NewPlayer->GetPlayerState<ADT_PlayerState>();
+
+	if (PS && PS->GetTeam() == ETeam::ET_NoTeam)
+	{
+		if (GS->BlueTeam.Num() >= GS->RedTeam.Num())
+		{
+			GS->RedTeam.AddUnique(PS);
+			PS->SetTeam(ETeam::ET_RedTeam);
+		}
+		else
+		{
+			GS->BlueTeam.AddUnique(PS);
+			PS->SetTeam(ETeam::ET_BlueTeam);
+		}
+	}
 }
 
 void ADT_GameMode::RequestPlayerRespawn(ACharacter* Character, AController* Controller)

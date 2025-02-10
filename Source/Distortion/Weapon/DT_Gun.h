@@ -7,6 +7,7 @@
 #include "Interface/DT_GunInterface.h"
 #include "DT_Gun.generated.h"
 
+
 /**
  * 
  */
@@ -20,7 +21,7 @@ public:
 
 	// virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override;
+	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override { }
 	
 	virtual void SetFXVisibility(const bool bVisible) override;
 
@@ -28,14 +29,18 @@ public:
 
 	virtual float GetAutoFireDelay() const override { return FireDelay; }
 	virtual UAnimMontage* GetReloadMontage() const override { return ReloadMontage; }
+	virtual uint8 GetAmmo() const override { return Ammo; }
+	virtual void Load() override { Ammo = MaxAmmo; }
+	virtual void DecreaseAmmo() override { Ammo = FMath::Clamp(Ammo - 1, 0, MaxAmmo); }
+
 protected:
 	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
 
 protected:
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UAnimationAsset> FireAnimation;
+	TObjectPtr<UAnimMontage> FireAnimation;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAnimMontage> ReloadMontage;
 
 	UPROPERTY(EditAnywhere)
@@ -43,7 +48,10 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float FireDelay = .15f;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	uint8 Ammo = 30;
+	uint8 MaxAmmo = 30;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 Ammo;
 };

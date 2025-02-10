@@ -34,11 +34,13 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
 }
 
+
 void ADT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ADT_BaseCharacter, bRMBDown, COND_SimulatedOnly);
+	// DOREPLIFETIME(ADT_BaseCharacter, Color);
 }
 
 void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionName)
@@ -58,9 +60,14 @@ void ADT_BaseCharacter::PlayMontage(UAnimMontage* Montage, const FName& SectionN
 void ADT_BaseCharacter::LMB(bool bIsAttack)
 {
 	bLMBDown = bIsAttack;
+	FName SectionName;
+	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
+		SectionName = "Attack01";
+	else
+		SectionName = (bRMBDown) ? "Ironsight" : "Hip";
 
 	if (bLMBDown)
-		Attack();
+		DoAttack(SectionName);
 }
 
 void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
@@ -171,18 +178,6 @@ void ADT_BaseCharacter::Reload()
 	CombatComp->Reload();
 }
 
-void ADT_BaseCharacter::Attack()
-{
-	// 몽타주 섹션도 CombatComp에서 나누는 게
-	FName SectionName; 
-	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
-		SectionName = "Attack01";
-	else
-		SectionName = (bRMBDown)? "Ironsight": "Hip";
-
-	DoAttack(SectionName);
-}
-
 void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 {
 	if (GetActionState() != EActionState::EAS_Unocuupied)
@@ -192,6 +187,7 @@ void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		ImmediateRotate();
+
 	CombatComp->Attack(SectionName);
 }
 
@@ -240,7 +236,6 @@ void ADT_BaseCharacter::Hit(const FName& SectionName, const EAttackType& AttackT
 	if (GetActionState() == EActionState::EAS_Dead)
 		return;
 	SetActionState(EActionState::EAS_Hit);
-
 	CombatComp->Hit(SectionName, AttackType);
 }
 
@@ -280,4 +275,12 @@ void ADT_BaseCharacter::Dead()
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
 
+}
+
+void ADT_BaseCharacter::SetTeamColor(const ETeam& Team)
+{
+	if (Team == ETeam::ET_RedTeam)
+		GetMesh()->SetMaterial(0, RedTeamMaterial);
+	else if (Team == ETeam::ET_BlueTeam)
+		GetMesh()->SetMaterial(0, BlueTeamMaterial);
 }

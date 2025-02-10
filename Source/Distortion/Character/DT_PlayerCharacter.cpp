@@ -95,12 +95,15 @@ void ADT_PlayerCharacter::InitAttributeComp()
 		AttributeComp = State->GetAttributes();
 		AttributeComp->InitValue();
 		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
-		
+
 		const APlayerController* PlayerController = GetController<APlayerController>();
 		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
 		if (IsValid(Hud))
 			Hud->InitOverlay(State, AttributeComp);
+
+		SetTeamColor(State->GetTeam());
 	}
+
 }
 
 void ADT_PlayerCharacter::ReviseFOV(const bool bIsZoom)
