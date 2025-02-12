@@ -6,15 +6,14 @@
 #include "Library/DT_CustomLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
 #include "Data/DT_Crosshairs.h"
-
-#include "UI/HUD/DT_HUD.h"
-
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/HUD.h"
+#include "Interface/DT_HUDInterface.h"
 #include "TimerManager.h"
 #include "Interface/DT_GunInterface.h"
+#include "Blueprint/UserWidget.h"
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
@@ -53,58 +52,55 @@ void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	AActor* Owner = GetOwner();
-	if (IsValid(Owner))
-	{
-		CombatInterface = Cast<IDT_CombatInterface>(Owner);
-		MeshInterface = Cast<IDT_MeshInterface>(Owner);
-		StateInterface = Cast<IDT_StateInterface>(Owner);
+	Character = Cast<ACharacter>(GetOwner()); 
+	Controller = Cast<APlayerController>(Character->GetController());
 
-		CollisionManager->SetOwner(Cast<APawn>(Owner));
-		CollisionManager->SetActorsToIgnore(Owner);
+	if (IsValid(Character))
+	{
+		CombatInterface = Cast<IDT_CombatInterface>(Character);
+		MeshInterface = Cast<IDT_MeshInterface>(Character);
+		StateInterface = Cast<IDT_StateInterface>(Character);
+
+		CollisionManager->SetOwner(Cast<APawn>(Character));
+		CollisionManager->SetActorsToIgnore(Character);
 	}
 }
 
 
 void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	APlayerController* Controller = Cast<APlayerController>(Character->GetController());
-	
-	if (Controller)
+	IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
+	if (HUDInterface)
 	{
-		ADT_HUD* Hud = Cast<ADT_HUD>(Controller->GetHUD());
-		if (Hud)
+		FCrosshairsTextures Textures;
+
+		if (GetEquipWeapon())
 		{
-			FCrosshairsTextures Textures;
+			Textures = Weapon->GetCrosshairs();
+			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
+			FVector2D VelocityMultiplierRange(0, 1);
 
-			if (GetEquipWeapon())
-			{
-				Textures = Weapon->GetCrosshairs();
-				FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
-				FVector2D VelocityMultiplierRange(0, 1);
+			const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
 
-				const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
+			CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
 
-				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
-				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
+			CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
+			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
 
-				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
-				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
-
-				Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
-			}
-			Hud->SetHUDPackage(Textures);
-
+			Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
 		}
+		HUDInterface->SetHUDPackage(Textures);
 	}
 }
 
 void UDT_CombatComponent::DestroyWeapon()
 {
 	WeaponData = nullptr;
-	if (Weapon)
+	if (IsValid(Weapon)) 
 		Weapon->Destroy();
+
+	VisibleStatus.ExecuteIfBound(ESlateVisibility::Hidden);
 }
 
 UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const
@@ -177,9 +173,15 @@ void UDT_CombatComponent::CreateWeapon(UDataAsset* DataAsset)
 	WeaponData = Cast<UDA_Weapon>(DataAsset);
 	if (IsValid(WeaponData) && IsValid(WeaponData->WeaponClass))
 	{
-		// 나중에 SpawnActorDeferred로 변경
-		Weapon = GetWorld()->SpawnActor<ADT_BaseWeapon>(WeaponData->WeaponClass);
-		Weapon->Equip(Cast<APawn>(GetOwner()), WeaponData->HolsterSocketName, CollisionManager);
+		FTransform SpawnTransform = FTransform::Identity;
+		ADT_BaseWeapon* TempWeapon = GetWorld()->SpawnActorDeferred<ADT_BaseWeapon>(
+			WeaponData->WeaponClass, SpawnTransform);
+		if (TempWeapon)
+		{
+			TempWeapon->FinishSpawning(SpawnTransform);
+			TempWeapon->Equip(Cast<APawn>(GetOwner()), WeaponData->HolsterSocketName, CollisionManager);
+			Weapon = TempWeapon;
+		}
 	}
 }
 
@@ -189,6 +191,21 @@ void UDT_CombatComponent::Equip(const bool bIsEquip, const FName& SectionName)
 	if (bIsEquip)
 		WeaponType = WeaponData->WeaponType;
 	ServerRPCEquip(bIsEquip, SectionName, WeaponType);
+
+	VisibleStatus.ExecuteIfBound((bIsEquip) ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	Image.ExecuteIfBound(WeaponData->WeaponImage);
+
+	IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
+	HUDInterface->BindingEquipVM();
+	
+	if (WeaponType == EWeaponType::EWT_Gun)
+	{
+		AmmoVisible.ExecuteIfBound(ESlateVisibility::Visible);
+		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
+		GunInterface->ExecutionEvent();
+	}
+	else
+		AmmoVisible.ExecuteIfBound(ESlateVisibility::Hidden);
 }
 
 void UDT_CombatComponent::ServerRPCEquip_Implementation(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType)
@@ -215,11 +232,11 @@ void UDT_CombatComponent::ServerRPCReload_Implementation()
 
 void UDT_CombatComponent::MulticastRPCReload_Implementation()
 {
-	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
-	if (Interface)
+	IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
+	if (GunInterface)
 	{
-		CombatInterface->PlayMontage(Interface->GetReloadMontage());
-		Interface->Load();
+		CombatInterface->PlayMontage(GunInterface->GetReloadMontage());
+		GunInterface->Load();
 	}
 }
 
@@ -299,17 +316,15 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UDT_CombatComponent::StartFireTimer()
 {
-	IDT_GunInterface* Interface = Cast<IDT_GunInterface>(Weapon);
-	if (Interface->GetAmmo() <= 0)
+	IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
+	if (GunInterface->GetAmmo() <= 0)
 		return;
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]() {
-		if (StateInterface->GetLMBDown())
-		{
+		if (StateInterface->GetLMBDown()) {
 			StateInterface->SetActionState(EActionState::EAS_Unoccupied);
 			CombatInterface->DoAttack(StateInterface->GetRMBDown() ? "Ironsight" : "Hip");
-		}
-		}), Interface->GetAutoFireDelay(), false);
+		} }), GunInterface->GetAutoFireDelay(), false);
 }
 
 void UDT_CombatComponent::ServerRPCCollisionEnd_Implementation()

@@ -55,7 +55,7 @@ void ADT_GameMode::RequestPlayerRespawn(ACharacter* Character, AController* Cont
 	{
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+		uint8 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		
 		RestartPlayerAtPlayerStart(Controller, PlayerStarts[Selection]);
 		

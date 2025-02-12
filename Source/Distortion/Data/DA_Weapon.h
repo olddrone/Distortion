@@ -27,7 +27,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAnimMontage> GuardMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
 	UPROPERTY(EditAnywhere)
@@ -38,4 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float AttackCost;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> WeaponImage;
 };

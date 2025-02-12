@@ -15,11 +15,6 @@ void UDT_AttributeComponent::InitValue()
 	SetStamina(Attributes.MaxStamina);
 }
 
-void UDT_AttributeComponent::UseStamina(const float& Cost)
-{
-	SetStamina(Stamina - Cost);
-}
-
 void UDT_AttributeComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -77,7 +72,6 @@ void UDT_AttributeComponent::StopRegenTimer()
 
 void UDT_AttributeComponent::RegenStamina()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Called"));
 	SetStamina(Stamina + Attributes.StaminaRegenRate);
 
 	if (Stamina == Attributes.MaxStamina)

@@ -5,36 +5,44 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "Data/DT_Crosshairs.h"
+#include "Interface/DT_HUDInterface.h"
 #include "DT_HUD.generated.h"
 
-class ADT_PlayerState;
-class UDT_AttributeComponent;
 class UDT_VM_Attribute;
+class UDT_VM_EquipWeapon;
 /**
  * 
  */
 UCLASS()
-class DISTORTION_API ADT_HUD : public AHUD
+class DISTORTION_API ADT_HUD : public AHUD, public IDT_HUDInterface
 {
 	GENERATED_BODY()
-public:
 
 public:
-	void InitOverlay(ADT_PlayerState* InPlayerState, UDT_AttributeComponent* InAttributes);
+	void InitOverlay(class UDT_AttributeComponent* InAttributes, class UDT_CombatComponent* InCombat);
 
 	virtual void DrawHUD() override;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TObjectPtr<UDT_VM_Attribute> AttributesViewModel;
-	
-	FORCEINLINE void SetHUDPackage(const FCrosshairsTextures& InPackage) { HUDPackage = InPackage; }
-	
+	FORCEINLINE UDT_VM_Attribute* GetAttributeVM() const { return AttributeVM; }
+	UDT_VM_EquipWeapon* GetEquipWeaponVM() const { return EquipWeaponVM; }
+	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) override { HUDPackage = InPackage; }
+	virtual void BindingEquipVM() override;
+
 protected:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
 
 protected:
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TObjectPtr<UDT_VM_Attribute> AttributeVM;
+
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UDT_VM_Attribute> AttributesViewModelClass;
+	TSubclassOf<UDT_VM_Attribute> AttributeVMClass;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TObjectPtr<UDT_VM_EquipWeapon> EquipWeaponVM;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDT_VM_EquipWeapon> EquipWeaponVMClass;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> OverlayWidgetClass;

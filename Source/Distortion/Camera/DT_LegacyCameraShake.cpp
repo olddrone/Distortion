@@ -5,6 +5,7 @@
 
 UDT_LegacyCameraShake::UDT_LegacyCameraShake()
 {
+	// 이것도 데이터에셋으로
 	OscillationDuration = 0.25f;
 	OscillationBlendInTime = 0.05f;
 	OscillationBlendOutTime = 0.05f;

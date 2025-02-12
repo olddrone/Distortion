@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DT_GunInterface.generated.h"
+#include "DT_HUDInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDT_GunInterface : public UInterface
+class UDT_HUDInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,17 +16,13 @@ class UDT_GunInterface : public UInterface
 /**
  * 
  */
-class DISTORTION_API IDT_GunInterface
+class DISTORTION_API IDT_HUDInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual float GetAutoFireDelay() const = 0;
-	virtual UAnimMontage* GetReloadMontage() const = 0;
-	virtual uint8 GetAmmo() const = 0;
-	virtual void SetAmmo(const uint8 InAmmo) = 0;
-	virtual void Load() = 0;
-	virtual void DecreaseAmmo() = 0;
-	virtual void ExecutionEvent() = 0;
+	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) = 0;
+	virtual void BindingEquipVM() = 0;
+
 };

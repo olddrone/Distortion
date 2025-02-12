@@ -32,7 +32,7 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return Attributes.MaxHealth; }
 	FORCEINLINE float GetMaxStamina() const { return Attributes.MaxStamina; }
 
-	void UseStamina(const float& Cost);
+	FORCEINLINE void UseStamina(const float& Cost) { SetStamina(Stamina - Cost); }
 
 protected:
 	virtual void InitializeComponent() override;

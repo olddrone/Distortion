@@ -8,7 +8,6 @@
 
 class UDT_AttributeComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStatInitDelegate, const UDT_AttributeComponent*, Attributes);
 /**
  * 
  */
@@ -17,7 +16,7 @@ class DISTORTION_API UDT_VM_Attribute : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 public:
-	void Init(APlayerController* InPlayerController, class ADT_PlayerState* InPlayerState, UDT_AttributeComponent* InAttributes);
+	void Init(UDT_AttributeComponent* InAttributes);
    
     UFUNCTION(BlueprintPure, FieldNotify)
     float GetHealthPercent() const { return (MaxHealth != 0) ? Health / MaxHealth : 0; }
@@ -51,12 +50,6 @@ public:
 
 protected:
     virtual void BindCallbacks();
-
-    UFUNCTION()
-    void OnHealthChanged(const float InHealth);
-
-    UFUNCTION()
-    void OnStaminaChanged(const float InStamina);
 
 protected:
     UPROPERTY()

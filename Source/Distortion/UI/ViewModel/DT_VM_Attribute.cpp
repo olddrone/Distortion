@@ -2,10 +2,8 @@
 
 #include "DT_VM_Attribute.h"
 #include "Component/DT_AttributeComponent.h"
-#include "PlayerState/DT_PlayerState.h"
 
-void UDT_VM_Attribute::Init(APlayerController* InPlayerController,
-	ADT_PlayerState* InPlayerState, UDT_AttributeComponent* InAttributes)
+void UDT_VM_Attribute::Init(UDT_AttributeComponent* InAttributes)
 {
 	Attributes = Cast<UDT_AttributeComponent>(InAttributes);
 	BindCallbacks();
@@ -18,19 +16,10 @@ void UDT_VM_Attribute::BindCallbacks()
 
 	SetMaxHealth(Attributes->GetMaxHealth());
 	SetHealth(Attributes->GetHealth());
-	Attributes->HealthChange.AddUObject(this, &UDT_VM_Attribute::OnHealthChanged);
-	Attributes->StaminaChange.AddUObject(this, &UDT_VM_Attribute::OnStaminaChanged);
+	Attributes->HealthChange.AddUObject(this, &UDT_VM_Attribute::SetHealth);
+	Attributes->StaminaChange.AddUObject(this, &UDT_VM_Attribute::SetStamina);
 
 	SetMaxStamina(Attributes->GetMaxStamina());
 	SetStamina(Attributes->GetStamina());
 }
 
-void UDT_VM_Attribute::OnHealthChanged(const float InHealth)
-{
-	SetHealth(InHealth);
-}
-
-void UDT_VM_Attribute::OnStaminaChanged(const float InStamina)
-{
-	SetStamina(InStamina);
-}

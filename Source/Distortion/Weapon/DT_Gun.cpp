@@ -22,3 +22,8 @@ void ADT_Gun::SetFXVisibility(const bool bVisible)
 	}
 }
 
+void ADT_Gun::SetAmmo(const uint8 InAmmo)
+{
+	Ammo = FMath::Clamp(Ammo - 1, 0, MaxAmmo);
+	AmmoChange.ExecuteIfBound(Ammo);
+}

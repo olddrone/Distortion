@@ -69,6 +69,7 @@ void ADT_PlayerCharacter::Dead()
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		if (PlayerController)
 			PlayerController->DisableInput(nullptr); 
+
 	}
 	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
@@ -99,7 +100,7 @@ void ADT_PlayerCharacter::InitAttributeComp()
 		const APlayerController* PlayerController = GetController<APlayerController>();
 		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
 		if (IsValid(Hud))
-			Hud->InitOverlay(State, AttributeComp);
+			Hud->InitOverlay(AttributeComp, CombatComp);
 
 		SetTeamColor(State->GetTeam());
 	}

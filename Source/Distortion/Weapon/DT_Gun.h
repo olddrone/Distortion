@@ -8,6 +8,7 @@
 #include "DT_Gun.generated.h"
 
 
+DECLARE_DELEGATE_OneParam(FAmmoChangeDelegate, uint8);
 /**
  * 
  */
@@ -30,8 +31,10 @@ public:
 	virtual float GetAutoFireDelay() const override { return FireDelay; }
 	virtual UAnimMontage* GetReloadMontage() const override { return ReloadMontage; }
 	virtual uint8 GetAmmo() const override { return Ammo; }
-	virtual void Load() override { Ammo = MaxAmmo; }
-	virtual void DecreaseAmmo() override { Ammo = FMath::Clamp(Ammo - 1, 0, MaxAmmo); }
+	virtual void SetAmmo(const uint8 InAmmo) override;
+	virtual void Load() override { Ammo = MaxAmmo; AmmoChange.ExecuteIfBound(Ammo); }
+	virtual void DecreaseAmmo() override { SetAmmo(Ammo-1); }
+	virtual void ExecutionEvent() override { AmmoChange.ExecuteIfBound(Ammo); }
 
 protected:
 	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
@@ -54,4 +57,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 Ammo;
+
+public:
+	FAmmoChangeDelegate AmmoChange;
 };

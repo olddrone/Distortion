@@ -15,6 +15,11 @@ class UAnimMontage;
 class ADT_BaseWeapon;
 class UDT_CollisionManager;
 
+DECLARE_DELEGATE_OneParam(FVisibleStatusDelegate, ESlateVisibility);
+DECLARE_DELEGATE_OneParam(FImageDelegate, UTexture2D*);
+DECLARE_DELEGATE_OneParam(FAmmoVisibleDelegate, ESlateVisibility);
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DISTORTION_API UDT_CombatComponent : public UActorComponent
 {
@@ -88,6 +93,7 @@ public:
 	void DestroyWeapon();
 
 	FORCEINLINE float GetWeaponCost() const { return (GetEquipWeapon()) ? WeaponData->AttackCost : 10.f; }
+	FORCEINLINE ADT_BaseWeapon* GetWeapon() const { return Weapon; }
 
 public:
 	FORCEINLINE void SetEquipWeapon(const bool InEquipWeapon) { bEquipWeapon = InEquipWeapon; }
@@ -140,6 +146,10 @@ private:
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 	float CrosshairZoom;
+
+	TObjectPtr<ACharacter> Character;
+	TObjectPtr<APlayerController> Controller;
+
 public:
 	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }
 	
@@ -154,4 +164,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCGuard(const FName& Section);
 
+	FVisibleStatusDelegate VisibleStatus;
+	FImageDelegate Image;
+	FAmmoVisibleDelegate AmmoVisible;
 };
