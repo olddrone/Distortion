@@ -147,8 +147,8 @@ private:
 	float CrosshairShootingFactor;
 	float CrosshairZoom;
 
-	TObjectPtr<ACharacter> Character;
-	TObjectPtr<APlayerController> Controller;
+	TWeakObjectPtr<ACharacter> Character;
+	TWeakObjectPtr<APlayerController> Controller;
 
 public:
 	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }

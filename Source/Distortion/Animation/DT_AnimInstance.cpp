@@ -9,23 +9,23 @@ void UDT_AnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation(); 
 	Character = Cast<ACharacter>(TryGetPawnOwner());
-	if (IsValid(Character))
+	if (Character.IsValid())
 	{
 		CharacterMovement = Character->GetCharacterMovement();
-		StateInterface = Cast<IDT_StateInterface>(Character);
-		AOInterface = Cast<IDT_AimOffsetInterface>(Character);
+		StateInterface = TScriptInterface<IDT_StateInterface>(Character.Get());
+		AOInterface = TScriptInterface<IDT_AimOffsetInterface>(Character.Get());
 	}
 }
 
 void UDT_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
-	if (Character && CharacterMovement)
+	if (Character.IsValid() && CharacterMovement.IsValid())
 	{
 		Velocity = CharacterMovement->Velocity;
 		bIsFalling = CharacterMovement->IsFalling();
 		bIsCrouch = CharacterMovement->IsCrouching();
-		bShouldMove = (CharacterMovement->GetCurrentAcceleration() != FVector(0));
+		bShouldMove = (CharacterMovement->GetCurrentAcceleration() != FVector::ZeroVector);
 		bZoom = StateInterface->GetRMBDown();
 
 		MoveForward = FVector::DotProduct(Character->GetActorForwardVector(), Velocity);

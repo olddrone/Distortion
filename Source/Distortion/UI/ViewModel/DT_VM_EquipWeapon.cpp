@@ -25,5 +25,6 @@ void UDT_VM_EquipWeapon::BindCallbacks()
 void UDT_VM_EquipWeapon::BindAmmo()
 {
 	ADT_Gun* Gun = Cast<ADT_Gun>(Combat->GetWeapon());
-	Gun->AmmoChange.BindUObject(this, &UDT_VM_EquipWeapon::SetAmmo);
+	if (IsValid(Gun))
+		Gun->AmmoChange.BindUObject(this, &UDT_VM_EquipWeapon::SetAmmo);
 }

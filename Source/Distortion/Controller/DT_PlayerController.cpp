@@ -6,10 +6,16 @@
 #include "GameFramework/Character.h"
 #include "Character/DT_PlayerCharacter.h"
 #include "Camera/DT_CameraManager.h"
+#include "UObject/ConstructorHelpers.h"
 
 ADT_PlayerController::ADT_PlayerController()
 {
-	PlayerCameraManager = Cast<APlayerCameraManager>(ADT_CameraManager::StaticClass());
+	static ConstructorHelpers::FObjectFinder<UPDA_Input> InputRef(
+		TEXT("/Game/Input/PDA_Input.PDA_Input"));
+	if (InputRef.Succeeded())
+		InputData = InputRef.Object;
+	
+	PlayerCameraManagerClass = ADT_CameraManager::StaticClass();
 }
 
 void ADT_PlayerController::SetupInputComponent()
@@ -53,14 +59,15 @@ void ADT_PlayerController::OnRep_Pawn()
 void ADT_PlayerController::Init()
 {
 	EnableInput(this);
-	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	if (Subsystem)
 		Subsystem->AddMappingContext(InputData->MappingContext, 0);
 
 	PlayerCharacter = Cast<ADT_PlayerCharacter>(GetCharacter());
 	if (IsValid(PlayerCharacter))
-		StateInterface = Cast<IDT_StateInterface>(PlayerCharacter);
-		
+	{
+		StateInterface = TScriptInterface<IDT_StateInterface>(PlayerCharacter);
+	}
 }
 
 void ADT_PlayerController::Move(const FInputActionValue& InputActionValue)
@@ -127,18 +134,4 @@ void ADT_PlayerController::Equip()
 void ADT_PlayerController::Reload()
 {
 	PlayerCharacter->Reload();
-}
-
-void ADT_PlayerController::SetZoom(const bool& bIsZoom)
-{
-	ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
-	if (CameraManager)
-		CameraManager->SetZoomState(bIsZoom);
-}
-
-void ADT_PlayerController::DoHitCameraShake()
-{
-	ADT_CameraManager* CameraManager = Cast<ADT_CameraManager>(PlayerCameraManager);
-	if (CameraManager)
-		CameraManager->DoHitCameraShake();
 }

@@ -32,60 +32,30 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 void ADT_PlayerCharacter::RestoreState()
 {
 	Super::RestoreState(); 
-	ReviseFOV(bRMBDown);
+
+	if (IsLocallyControlled() && GetEquipWeaponType() == EWeaponType::EWT_Gun)
+		CameraInterface->SetZoom(bRMBDown);
 }
 
 void ADT_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	InitAttributeComp(); // 리슨 서버
+	InitAttributeComp(); // 리슨 서버, 서버에서 호출됨
 }
 
 void ADT_PlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	InitAttributeComp(); // 클라
+	InitAttributeComp(); // 클라, 서버에서 생성된 걸 복제
 }
 
-void ADT_PlayerCharacter::Hit(const FName& SectionName, const EAttackType& AttackType)
+void ADT_PlayerCharacter::BeginPlay()
 {
-	Super::Hit(SectionName, AttackType);
-	
-	if (IsLocallyControlled())
-	{
-		IDT_CameraControlInterface* Interface = Cast<IDT_CameraControlInterface>(GetController());
-		Interface->DoHitCameraShake();
-	}
-}
+	Super::BeginPlay();
 
-void ADT_PlayerCharacter::Dead()
-{
-	Super::Dead();
-	
-	if (IsLocallyControlled())
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
-		if (PlayerController)
-			PlayerController->DisableInput(nullptr); 
-
-	}
-	FTimerHandle Handle;
-	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
-}
-
-void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
-{
-	Super::RMB(bHoldRotationYaw);
-	ReviseFOV(bHoldRotationYaw);
-}
-
-void ADT_PlayerCharacter::Respawn()
-{
-	IDT_RespawnInterface* Interface = Cast<IDT_RespawnInterface>(GetWorld()->GetAuthGameMode());
-	if (Interface)
-		Interface->RequestPlayerRespawn(this, Controller);
+	BindingInterface();
 }
 
 void ADT_PlayerCharacter::InitAttributeComp()
@@ -97,25 +67,54 @@ void ADT_PlayerCharacter::InitAttributeComp()
 		AttributeComp->InitValue();
 		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
 
-		const APlayerController* PlayerController = GetController<APlayerController>();
-		ADT_HUD* Hud = (PlayerController) ? PlayerController->GetHUD<ADT_HUD>() : nullptr;
+		const APlayerController* PC = GetController<APlayerController>();
+		ADT_HUD* Hud = (PC) ? PC->GetHUD<ADT_HUD>() : nullptr;
 		if (IsValid(Hud))
 			Hud->InitOverlay(AttributeComp, CombatComp);
 
 		SetTeamColor(State->GetTeam());
 	}
-
 }
 
-void ADT_PlayerCharacter::ReviseFOV(const bool bIsZoom)
+void ADT_PlayerCharacter::BindingInterface()
 {
-	if (IsLocallyControlled())
-	{
-		IDT_CameraControlInterface* Interface = Cast<IDT_CameraControlInterface>(GetController());
+	APlayerController* PC = GetController<APlayerController>();
+	if (PC)
+		CameraInterface = TScriptInterface<IDT_CameraControlInterface>(PC->PlayerCameraManager);
+}
 
-		if (GetEquipWeaponType() == EWeaponType::EWT_Gun)
-			Interface->SetZoom(bIsZoom);
-		else
-			Interface->SetZoom(false);
+void ADT_PlayerCharacter::Hit(const FName& SectionName, const EAttackType& AttackType)
+{
+	Super::Hit(SectionName, AttackType);
+
+	CameraInterface->DoHitCameraShake();
+}
+
+void ADT_PlayerCharacter::Dead()
+{
+	Super::Dead();
+	
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+		PlayerController->DisableInput(nullptr); 
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
+}
+
+void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
+{
+	Super::RMB(bHoldRotationYaw);
+	if(GetEquipWeaponType() == EWeaponType::EWT_Gun)
+		CameraInterface->SetZoom(bRMBDown);
+}
+
+void ADT_PlayerCharacter::Respawn()
+{
+	IDT_RespawnInterface* Interface = Cast<IDT_RespawnInterface>(GetWorld()->GetAuthGameMode());
+	if (Interface)
+	{
+		Interface->RequestPlayerRespawn(this, Controller);
+		BindingInterface();
 	}
 }

@@ -1,18 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DT_LegacyCameraShake.h"
+#include "UObject/ConstructorHelpers.h"
 
 UDT_LegacyCameraShake::UDT_LegacyCameraShake()
 {
-	// 이것도 데이터에셋으로
-	OscillationDuration = 0.25f;
-	OscillationBlendInTime = 0.05f;
-	OscillationBlendOutTime = 0.05f;
+	static ConstructorHelpers::FObjectFinder<UDA_HitCameraShake> DataRef(
+		TEXT("/Game/Data/DA_HitCameraShake.DA_HitCameraShake"));
+	if (DataRef.Succeeded())
+		ShakeData = DataRef.Object;
 
-	RotOscillation.Pitch.Amplitude = FMath::RandRange(3.f, 5.f);
-	RotOscillation.Pitch.Frequency = FMath::RandRange(15.f, 20.f);
+	OscillationDuration = ShakeData->Oscillation.Duration;
+	OscillationBlendInTime = ShakeData->Oscillation.BlendInTime;
+	OscillationBlendOutTime = ShakeData->Oscillation.BlendOutTime;
 
-	RotOscillation.Yaw.Amplitude = FMath::RandRange(3.f, 5.f);
-	RotOscillation.Yaw.Frequency = FMath::RandRange(15.f, 20.f);
+	RotOscillation.Pitch.Amplitude = FMath::RandRange(ShakeData->Amplitude.Min, ShakeData->Amplitude.Max);
+	RotOscillation.Pitch.Frequency = FMath::RandRange(ShakeData->Frequency.Min, ShakeData->Frequency.Max);
+
+	RotOscillation.Yaw.Amplitude = FMath::RandRange(ShakeData->Amplitude.Min, ShakeData->Amplitude.Max);
+	RotOscillation.Yaw.Frequency = FMath::RandRange(ShakeData->Frequency.Min, ShakeData->Frequency.Max);
+	
 }

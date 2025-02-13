@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/DT_BaseCharacter.h"
+#include "Interface/DT_CameraControlInterface.h"
 #include "DT_PlayerCharacter.generated.h"
 
 /**
@@ -26,10 +27,10 @@ public:
 	virtual void RMB(bool bHoldRotationYaw) override;
 
 protected:
+	virtual void BeginPlay() override;
 	void Respawn();
-
 	void InitAttributeComp();
-	void ReviseFOV(const bool bIsZoom);
+	void BindingInterface();
 
 private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -38,4 +39,6 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> CameraComponent;
 
+	UPROPERTY()
+	TScriptInterface<IDT_CameraControlInterface> CameraInterface;
 };

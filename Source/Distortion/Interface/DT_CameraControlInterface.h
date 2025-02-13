@@ -22,5 +22,5 @@ class DISTORTION_API IDT_CameraControlInterface
 
 public:
 	virtual void DoHitCameraShake() = 0;
-	virtual void SetZoom(const bool& bIsZoom) = 0;
+	virtual void SetZoom(const bool& bInZoom) = 0;
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "Data/DT_DamageData.h"
+#include "Interface/DT_CombatInterface.h"
 #include "ANS_DoCollision.generated.h"
 
 /**
@@ -25,4 +26,6 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	FDamagePacket DamagePacket;
 
+	UPROPERTY()
+	TScriptInterface<IDT_CombatInterface> CombatInterface;
 };

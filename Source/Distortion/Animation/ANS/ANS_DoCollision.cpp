@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ANS_DoCollision.h"
-#include "Interface/DT_CombatInterface.h"
 
 void UANS_DoCollision::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	float TotalDuration, const FAnimNotifyEventReference& EventReference)
@@ -9,9 +8,9 @@ void UANS_DoCollision::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequen
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 	if (MeshComp)
 	{
-		IDT_CombatInterface* Interface = Cast<IDT_CombatInterface>(MeshComp->GetOwner());
-		if (Interface)
-			Interface->ActivateCollision(DamagePacket);
+		CombatInterface = TScriptInterface<IDT_CombatInterface>(MeshComp->GetOwner());
+		if (CombatInterface)
+			CombatInterface->ActivateCollision(DamagePacket);
 	}
 }
 
@@ -21,8 +20,7 @@ void UANS_DoCollision::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequence
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 	if (MeshComp)
 	{
-		IDT_CombatInterface* Interface = Cast<IDT_CombatInterface>(MeshComp->GetOwner());
-		if (Interface)
-			Interface->DeactivateCollision();
+		if (CombatInterface)
+			CombatInterface->DeactivateCollision();
 	}
 }

@@ -6,7 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Data/PDA_Input.h"
 #include "Interface/DT_StateInterface.h"
-#include "Interface/DT_CameraControlInterface.h"
 #include "DT_PlayerController.generated.h"
 
 struct FInputActionValue;
@@ -14,14 +13,13 @@ struct FInputActionValue;
 /**
  * 
  */
-UCLASS()
-class DISTORTION_API ADT_PlayerController : public APlayerController, public IDT_CameraControlInterface
+UCLASS()															 
+class DISTORTION_API ADT_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
 	ADT_PlayerController();
 
-	virtual void DoHitCameraShake() override;
 protected:
 	// virtual void BeginPlay() override;
 
@@ -48,16 +46,13 @@ private:
 	void Reload();
 
 private:
-	virtual void SetZoom(const bool& bIsZoom) override;
-
-private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPDA_Input> InputData = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ADT_PlayerCharacter> PlayerCharacter = nullptr;
 
-	// TScriptInterface<ILT_StateInterface>
-	IDT_StateInterface* StateInterface;
+	UPROPERTY()
+	TScriptInterface<IDT_StateInterface> StateInterface;
 
 };

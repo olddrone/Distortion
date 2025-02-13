@@ -4,7 +4,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Library/DT_CustomLibrary.h"
 #include "Interface/DT_CombatInterface.h"
-#include "Library/DT_CustomLibrary.h"
 
 UDT_CollisionManager::UDT_CollisionManager()
 {
@@ -12,7 +11,7 @@ UDT_CollisionManager::UDT_CollisionManager()
 
 void UDT_CollisionManager::DoCollision(AActor* Caller)
 {
-	MeshInterface = Cast<IDT_MeshInterface>(Caller);
+	MeshInterface = TScriptInterface<IDT_MeshInterface>(Caller);
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &UDT_CollisionManager::TraceCheck, InRate, true);
 }
 

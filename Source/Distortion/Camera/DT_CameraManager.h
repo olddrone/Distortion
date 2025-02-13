@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Interface/DT_CameraControlInterface.h"
 #include "DT_CameraManager.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DISTORTION_API ADT_CameraManager : public APlayerCameraManager
+class DISTORTION_API ADT_CameraManager : public APlayerCameraManager, public IDT_CameraControlInterface
 {
 	GENERATED_BODY()
 
@@ -18,9 +19,8 @@ public:
 	ADT_CameraManager();
 
 	virtual void UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime) override;
-	void DoHitCameraShake();
-
-	FORCEINLINE void SetZoomState(bool bInZoom) { bIsZooming = bInZoom; }
+	virtual void DoHitCameraShake() override;
+	virtual void SetZoom(const bool& bInZoom) override { bIsZooming = bInZoom; }
 
 protected:
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Shakes/LegacyCameraShake.h"
+#include "Data/DA_HitCameraShake.h"
 #include "DT_LegacyCameraShake.generated.h"
 
 /**
@@ -16,4 +17,8 @@ class DISTORTION_API UDT_LegacyCameraShake : public ULegacyCameraShake
 	
 public:
 	UDT_LegacyCameraShake();
+
+private:
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UDA_HitCameraShake> ShakeData;
 };

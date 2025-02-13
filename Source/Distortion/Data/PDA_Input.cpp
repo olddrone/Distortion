@@ -4,7 +4,7 @@
 #include "PDA_Input.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
-
+#include "UObject/ConstructorHelpers.h"
 
 UPDA_Input::UPDA_Input()
 {

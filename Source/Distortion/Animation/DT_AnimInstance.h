@@ -30,10 +30,10 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<ACharacter> Character;
+	TWeakObjectPtr<ACharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UCharacterMovementComponent> CharacterMovement;
+	TWeakObjectPtr<UCharacterMovementComponent> CharacterMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FVector Velocity;
@@ -65,8 +65,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float AO_Pitch;
 
-	class IDT_StateInterface* StateInterface;
-	class IDT_AimOffsetInterface* AOInterface;
+	UPROPERTY()
+	TScriptInterface<IDT_StateInterface> StateInterface;
+
+	UPROPERTY()
+	TScriptInterface<IDT_AimOffsetInterface> AOInterface;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FTransform LeftHandTransform;

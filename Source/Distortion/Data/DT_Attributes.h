@@ -6,7 +6,7 @@
 #include "Engine/DataTable.h"
 #include "DT_Attributes.generated.h"
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct FDT_Attributes : public FTableRowBase
 {
 	GENERATED_BODY()

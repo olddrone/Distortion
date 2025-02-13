@@ -56,8 +56,9 @@ private:
 	TPair<FVector, FVector> BeforePoints = { FVector::ZeroVector,FVector::ZeroVector };
 	
 	TObjectPtr<APawn> Pawn;
-	// TScriptInterface<class ILT_MeshInterface> MeshInterface;
-	IDT_MeshInterface* MeshInterface;
+
+	UPROPERTY()
+	TScriptInterface<IDT_MeshInterface> MeshInterface;
 
 	float Damage = 10.f;
 };

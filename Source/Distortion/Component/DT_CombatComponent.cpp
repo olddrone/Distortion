@@ -55,42 +55,45 @@ void UDT_CombatComponent::BeginPlay()
 	Character = Cast<ACharacter>(GetOwner()); 
 	Controller = Cast<APlayerController>(Character->GetController());
 
-	if (IsValid(Character))
+	if (Character.IsValid())
 	{
 		CombatInterface = Cast<IDT_CombatInterface>(Character);
 		MeshInterface = Cast<IDT_MeshInterface>(Character);
 		StateInterface = Cast<IDT_StateInterface>(Character);
 
 		CollisionManager->SetOwner(Cast<APawn>(Character));
-		CollisionManager->SetActorsToIgnore(Character);
+		CollisionManager->SetActorsToIgnore(Character.Get());
 	}
 }
 
 
 void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
-	if (HUDInterface)
+	if (Controller.IsValid())
 	{
-		FCrosshairsTextures Textures;
-
-		if (GetEquipWeapon())
+		IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller.Get()->GetHUD());
+		if (HUDInterface)
 		{
-			Textures = Weapon->GetCrosshairs();
-			FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
-			FVector2D VelocityMultiplierRange(0, 1);
+			FCrosshairsTextures Textures;
 
-			const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
+			if (GetEquipWeapon())
+			{
+				Textures = Weapon->GetCrosshairs();
+				FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
+				FVector2D VelocityMultiplierRange(0, 1);
 
-			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
-			CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
+				const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
 
-			CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
-			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
+				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
 
-			Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
+				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
+
+				Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+			}
+			HUDInterface->SetHUDPackage(Textures);
 		}
-		HUDInterface->SetHUDPackage(Textures);
 	}
 }
 
@@ -195,11 +198,11 @@ void UDT_CombatComponent::Equip(const bool bIsEquip, const FName& SectionName)
 	VisibleStatus.ExecuteIfBound((bIsEquip) ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Image.ExecuteIfBound(WeaponData->WeaponImage);
 
-	IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
-	HUDInterface->BindingEquipVM();
-	
 	if (WeaponType == EWeaponType::EWT_Gun)
 	{
+		IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
+		HUDInterface->BindingEquipVM();
+
 		AmmoVisible.ExecuteIfBound(ESlateVisibility::Visible);
 		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
 		GunInterface->ExecutionEvent();
