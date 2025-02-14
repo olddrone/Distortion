@@ -22,9 +22,13 @@ public:
 	virtual void DoHitCameraShake() override;
 	virtual void SetZoom(const bool& bInZoom) override { bIsZooming = bInZoom; }
 
-protected:
+private:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TWeakObjectPtr<ACharacter> Character;
 
-private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TWeakObjectPtr<class UCharacterMovementComponent> MoveComp;
+
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	float CrouchBlendDuration = .5f;
 	float CrouchBlendTime;

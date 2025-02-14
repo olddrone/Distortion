@@ -37,5 +37,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Data")
 	TObjectPtr<UDA_Weapon> WeaponData;
 
-	IDT_InteractionInterface* OverlapActor;
+	UPROPERTY()
+	TScriptInterface<IDT_InteractionInterface> ActorInterface;
 };

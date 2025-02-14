@@ -16,10 +16,10 @@ void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 {
 	Super::UpdateViewTarget(OutVT, DeltaTime);
 
-	if (ACharacter* Character = Cast<ACharacter>(GetOwningPlayerController()->GetPawn()))
+	if (Character.IsValid())
 	{
-		UCharacterMovementComponent* MoveComp = Character->GetCharacterMovement();
-		FVector TargetCrouchOffset = FVector(0.f, 0.f, MoveComp->GetCrouchedHalfHeight() - Character->GetClass()->GetDefaultObject<ACharacter>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		FVector TargetCrouchOffset = FVector(0.f, 0.f, 
+			MoveComp->GetCrouchedHalfHeight() - Character->GetClass()->GetDefaultObject<ACharacter>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		FVector Offset = FMath::Lerp(FVector::ZeroVector, TargetCrouchOffset, FMath::Clamp(CrouchBlendTime / CrouchBlendDuration, 0.f, 1.f));
 
 		if (MoveComp->IsCrouching())
@@ -37,10 +37,15 @@ void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 		TestFOV = FMath::FInterpTo(TestFOV, ChangeFOV, DeltaTime, ZoomInterpSpeed);
 		SetFOV(TestFOV);
 	}
+	else
+	{
+		Character = Cast<ACharacter>(GetOwningPlayerController()->GetPawn());
+		if (Character.IsValid())
+			MoveComp = Character->GetCharacterMovement();
+	}
 }
 
 void ADT_CameraManager::DoHitCameraShake()
 {
 	GetOwningPlayerController()->ClientStartCameraShake(HitShake);
 }
-

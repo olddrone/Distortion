@@ -17,7 +17,6 @@ ADT_ItemBox::ADT_ItemBox()
 	OverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	NetUpdateFrequency = 1.0f;
-
 }
 
 void ADT_ItemBox::BeginPlay()
@@ -33,7 +32,7 @@ void ADT_ItemBox::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	if (!WeaponData)
 		return;
 
-	OverlapActor = Cast<IDT_InteractionInterface>(OtherActor);
-	if (OverlapActor)
-		OverlapActor->Interaction(WeaponData);
+	ActorInterface = TScriptInterface<IDT_InteractionInterface>(OtherActor);
+	if (ActorInterface)
+		ActorInterface->Interaction(WeaponData);
 }

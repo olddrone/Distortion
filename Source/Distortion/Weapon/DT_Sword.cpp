@@ -35,7 +35,6 @@ void ADT_Sword::Attack(const FDamagePacket& DamagePacket, const FVector_NetQuant
 	if (IsValid(CollisionManager))
 	{
 		CollisionManager->SetDamagePacket(DamagePacket);
-		// CollisionManager->SetSocketName(DamagePacket.StartSocketName, DamagePacket.EndSocketName);
 		CollisionManager->SetDamage(Damage);
 		CollisionManager->DoCollision(this);
 	}

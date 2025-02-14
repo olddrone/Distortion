@@ -2,7 +2,7 @@
 
 #include "ANS_NextComboAttack.h"
 
-void UANS_NextComboAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, 
+void UANS_NextComboAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
@@ -20,14 +20,14 @@ void UANS_NextComboAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 	if (MeshComp)
 	{
-		if (StateInterface && CombatInterface)
+		
+		if (StateInterface->GetLMBDown())
 		{
-			if (StateInterface->GetLMBDown())
-			{
-				StateInterface->SetActionState(EActionState::EAS_Unoccupied);
-				StateInterface->RestoreState();
-				CombatInterface->DoAttack(SectionName);
-			}
+			StateInterface->SetActionState(EActionState::EAS_Unoccupied);
+			StateInterface->RestoreState();
+
+			CombatInterface->DoAttack(SectionName);
 		}
+
 	}
 }

@@ -47,10 +47,10 @@ private:
 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UPDA_Input> InputData = nullptr;
+	TObjectPtr<UPDA_Input> InputData;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class ADT_PlayerCharacter> PlayerCharacter = nullptr;
+	TObjectPtr<class ADT_PlayerCharacter> PlayerCharacter;
 
 	UPROPERTY()
 	TScriptInterface<IDT_StateInterface> StateInterface;
