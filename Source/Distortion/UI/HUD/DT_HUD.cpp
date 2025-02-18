@@ -26,7 +26,7 @@ void ADT_HUD::DrawHUD()
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-		float SpreadScaled = CrosshairSpreadMax * HUDPackage.Spread;
+		float SpreadScaled = HUDPackage.Spread;
 
 		if (HUDPackage != nullptr)
 		{
@@ -38,11 +38,13 @@ void ADT_HUD::DrawHUD()
 			DrawCrosshair(HUDPackage.Bottom, ViewportCenter, FVector2D(0, SpreadScaled));
 		}
 	}
+	
 }
 
-void ADT_HUD::BindingEquipVM()
+void ADT_HUD::BindingWeaponVM()
 {
 	EquipWeaponVM->BindAmmo();
+	EquipWeaponVM->BindAmmoVisibility();
 }
 
 void ADT_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
@@ -54,5 +56,4 @@ void ADT_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVect
 	const float ScreenY = ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y;
 		
 	DrawTexture(Texture, ScreenX, ScreenY, TextureWidth, TextureHeight, 0, 0, 1, 1, FLinearColor::Green);
-
 }

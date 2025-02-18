@@ -17,6 +17,7 @@ class DISTORTION_API UDT_VM_EquipWeapon : public UMVVMViewModelBase
 public:
 	void Init(UDT_CombatComponent* InCombat);
 	void BindAmmo();
+	void BindAmmoVisibility();
 
 	UFUNCTION(BlueprintPure, FieldNotify)
 	ESlateVisibility GetVisibilityStatus() const { return VisibilityStatus; }

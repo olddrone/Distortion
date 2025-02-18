@@ -2,6 +2,7 @@
 
 #include "DT_BaseWeapon.h"
 #include "GameFramework/Character.h"
+#include "Interface/DT_HUDInterface.h"
 
 ADT_BaseWeapon::ADT_BaseWeapon()
 {
@@ -32,4 +33,9 @@ void ADT_BaseWeapon::Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_Coll
 	SetOwner(OwnerPawn);
 	SetInstigator(OwnerPawn);
 	AttachMeshToSocket(Cast<ACharacter>(OwnerPawn)->GetMesh(), InSocketName);
+}
+
+void ADT_BaseWeapon::SetUI(const bool bIsEquip, IDT_HUDInterface* Interface)
+{
+	Interface->BindingWeaponVM();
 }

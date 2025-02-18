@@ -19,8 +19,9 @@ public:
 
 public:
 	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override final;
-	
+
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> ProjectileClass;
+
 };

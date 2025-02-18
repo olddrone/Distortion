@@ -9,6 +9,8 @@
 #include "Interface/DT_MeshInterface.h"
 #include "DT_BaseWeapon.generated.h"
 
+DECLARE_DELEGATE_OneParam(FAmmoVisibleDelegate, ESlateVisibility);
+
 UCLASS(Abstract)
 class DISTORTION_API ADT_BaseWeapon : public AActor, public IDT_MeshInterface
 {
@@ -29,6 +31,8 @@ public:
 
 	virtual FCrosshairsTextures GetCrosshairs() const { return FCrosshairsTextures(nullptr); }
 
+	virtual void SetUI(const bool bIsEquip, class IDT_HUDInterface* Interface);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -36,4 +40,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (AllowedClasses = "StaticMeshComponent, SkeletalMeshComponent"))
 	TObjectPtr<UMeshComponent> MeshComponent;
 
+public:
+	FAmmoVisibleDelegate AmmoVisible;
 };

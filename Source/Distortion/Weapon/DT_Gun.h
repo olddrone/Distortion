@@ -7,7 +7,6 @@
 #include "Interface/DT_GunInterface.h"
 #include "DT_Gun.generated.h"
 
-
 DECLARE_DELEGATE_OneParam(FAmmoChangeDelegate, uint8);
 /**
  * 
@@ -22,6 +21,8 @@ public:
 
 	// virtual void Tick(float DeltaTime) override;
 
+	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, class UDT_CollisionManager* InCollisionManager) override;
+
 	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override { }
 	
 	virtual void SetFXVisibility(const bool bVisible) override;
@@ -34,7 +35,9 @@ public:
 	virtual void SetAmmo(const uint8 InAmmo) override;
 	virtual void Load() override { Ammo = MaxAmmo; AmmoChange.ExecuteIfBound(Ammo); }
 	virtual void DecreaseAmmo() override { SetAmmo(Ammo-1); }
-	virtual void ExecutionEvent() override { AmmoChange.ExecuteIfBound(Ammo); }
+	virtual void AmmoChangeEvent() override { AmmoChange.ExecuteIfBound(Ammo); }
+
+	virtual void SetUI(const bool bIsEquip, class IDT_HUDInterface* Interface) override;
 
 protected:
 	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
@@ -60,4 +63,5 @@ protected:
 
 public:
 	FAmmoChangeDelegate AmmoChange;
+
 };

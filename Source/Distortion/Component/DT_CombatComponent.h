@@ -17,7 +17,6 @@ class UDT_CollisionManager;
 
 DECLARE_DELEGATE_OneParam(FVisibleStatusDelegate, ESlateVisibility);
 DECLARE_DELEGATE_OneParam(FImageDelegate, UTexture2D*);
-DECLARE_DELEGATE_OneParam(FAmmoVisibleDelegate, ESlateVisibility);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -146,6 +145,7 @@ private:
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 	float CrosshairZoom;
+	float CrosshairSpreadMax = 15.f;
 
 	TWeakObjectPtr<ACharacter> Character;
 	TWeakObjectPtr<APlayerController> Controller;
@@ -166,5 +166,6 @@ public:
 
 	FVisibleStatusDelegate VisibleStatus;
 	FImageDelegate Image;
-	FAmmoVisibleDelegate AmmoVisible;
+
+	float Spread;
 };

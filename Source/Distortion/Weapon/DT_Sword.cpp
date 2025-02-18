@@ -5,6 +5,7 @@
 #include "Component/DT_CombatComponent.h"
 #include "NiagaraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Blueprint/UserWidget.h"
 
 ADT_Sword::ADT_Sword()
 {
@@ -67,5 +68,11 @@ void ADT_Sword::SetFXVisibility(const bool bVisible)
 		TrailEffect->Activate();
 	else
 		TrailEffect->Deactivate();
+}
+
+void ADT_Sword::SetUI(const bool bIsEquip, IDT_HUDInterface* Interface)
+{
+	Super::SetUI(bIsEquip, Interface);
+	AmmoVisible.ExecuteIfBound(ESlateVisibility::Hidden);
 }
 

@@ -25,6 +25,7 @@ public:
 
 	virtual void SetFXVisibility(const bool bVisible)  override;
 
+	virtual void SetUI(const bool bIsEquip, class IDT_HUDInterface* Interface) override;
 protected:
 	virtual void BeginPlay() override;
 

@@ -5,6 +5,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "ObjectPool/DT_PoolSubSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ADT_ProjectileGun::ADT_ProjectileGun()
 {
@@ -21,10 +22,11 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 
 	if (MuzzleFlashSocket)
 	{
+		// Start
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Mesh);
 		FVector ToTarget = TraceHitTarget - SocketTransform.GetLocation();
 		FRotator TargetRotation = ToTarget.Rotation();
-
+		
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), 
@@ -32,3 +34,4 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 
 	}
 }
+

@@ -28,5 +28,5 @@ public:
 	virtual void SetAmmo(const uint8 InAmmo) = 0;
 	virtual void Load() = 0;
 	virtual void DecreaseAmmo() = 0;
-	virtual void ExecutionEvent() = 0;
+	virtual void AmmoChangeEvent() = 0;
 };

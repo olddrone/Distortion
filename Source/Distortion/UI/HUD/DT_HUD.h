@@ -26,7 +26,8 @@ public:
 	FORCEINLINE UDT_VM_Attribute* GetAttributeVM() const { return AttributeVM; }
 	UDT_VM_EquipWeapon* GetEquipWeaponVM() const { return EquipWeaponVM; }
 	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) override { HUDPackage = InPackage; }
-	virtual void BindingEquipVM() override;
+	
+	virtual void BindingWeaponVM() override;
 
 protected:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
@@ -48,7 +49,4 @@ protected:
 	TSubclassOf<UUserWidget> OverlayWidgetClass;
 private:
 	FCrosshairsTextures HUDPackage;
-
-	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess))
-	float CrosshairSpreadMax = 16.f;
 };

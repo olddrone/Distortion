@@ -14,6 +14,7 @@
 #include "TimerManager.h"
 #include "Interface/DT_GunInterface.h"
 #include "Blueprint/UserWidget.h"
+#include "DrawDebugHelpers.h"
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
@@ -66,7 +67,6 @@ void UDT_CombatComponent::BeginPlay()
 	}
 }
 
-
 void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 	if (Controller.IsValid())
@@ -89,8 +89,10 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
 				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
-
-				Textures.Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+				
+				Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+				Spread *= CrosshairSpreadMax;
+				Textures.Spread = Spread ;
 			}
 			HUDInterface->SetHUDPackage(Textures);
 		}
@@ -198,17 +200,8 @@ void UDT_CombatComponent::Equip(const bool bIsEquip, const FName& SectionName)
 	VisibleStatus.ExecuteIfBound((bIsEquip) ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Image.ExecuteIfBound(WeaponData->WeaponImage);
 
-	if (WeaponType == EWeaponType::EWT_Gun)
-	{
-		IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
-		HUDInterface->BindingEquipVM();
-
-		AmmoVisible.ExecuteIfBound(ESlateVisibility::Visible);
-		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
-		GunInterface->ExecutionEvent();
-	}
-	else
-		AmmoVisible.ExecuteIfBound(ESlateVisibility::Hidden);
+	IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller->GetHUD());
+	Weapon->SetUI(bIsEquip, HUDInterface);
 }
 
 void UDT_CombatComponent::ServerRPCEquip_Implementation(const bool bIsEquip, const FName& SectionName, const EWeaponType& WeaponType)
@@ -257,10 +250,12 @@ void UDT_CombatComponent::CollisionStart(const FDamagePacket& InDamagePacket)
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
+		CrosshairShootingFactor = .75f;
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
+
 		ServerRPCCollisionStart(InDamagePacket, HitResult.ImpactPoint);
-		CrosshairShootingFactor = .75f;
+		
 	}
 }
 
@@ -306,14 +301,25 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		FVector Start = CrosshairWorldPosition;
-		
+
 		float DistanceToCharacter = (GetOwner()->GetActorLocation() - Start).Size();
 		Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
-		FVector End = Start + CrosshairWorldDirection * 80000;
+		FVector End = Start + CrosshairWorldDirection * 50000;
 
-		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);  
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);
 		if (!TraceHitResult.bBlockingHit)
 			TraceHitResult.ImpactPoint = End;
+
+		// Scatter ±¸Çö
+		float CameraFOV = Controller->PlayerCameraManager->GetFOVAngle();
+		float DistanceToImpact = (End - Start).Size();
+		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * Spread * (90.0f / CameraFOV);
+		
+		FVector RandomOffset = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0, AdjustedRadius*2);
+		FVector ScatterEnd = End + RandomOffset;
+		TraceHitResult.ImpactPoint = ScatterEnd;
+
+		DrawDebugLine(GetWorld(), Start, TraceHitResult.ImpactPoint, FColor::Green, true);
 	}
 }
 
