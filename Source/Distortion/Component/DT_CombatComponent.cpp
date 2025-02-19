@@ -14,7 +14,6 @@
 #include "TimerManager.h"
 #include "Interface/DT_GunInterface.h"
 #include "Blueprint/UserWidget.h"
-#include "DrawDebugHelpers.h"
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
@@ -92,7 +91,7 @@ void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
 				
 				Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
 				Spread *= CrosshairSpreadMax;
-				Textures.Spread = Spread ;
+				Textures.Spread = Spread;
 			}
 			HUDInterface->SetHUDPackage(Textures);
 		}
@@ -252,7 +251,9 @@ void UDT_CombatComponent::CollisionStart(const FDamagePacket& InDamagePacket)
 	{
 		CrosshairShootingFactor = .75f;
 		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
+
+		if (GetEquipWeapon() && StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
+			TraceUnderCrosshairs(HitResult);
 
 		ServerRPCCollisionStart(InDamagePacket, HitResult.ImpactPoint);
 		
@@ -310,16 +311,12 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 			TraceHitResult.ImpactPoint = End;
 
-		// Scatter ±¸Çö
 		float CameraFOV = Controller->PlayerCameraManager->GetFOVAngle();
-		float DistanceToImpact = (End - Start).Size();
+		float DistanceToImpact = (TraceHitResult.ImpactPoint - Start).Size();
 		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * Spread * (90.0f / CameraFOV);
-		
-		FVector RandomOffset = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0, AdjustedRadius*2);
-		FVector ScatterEnd = End + RandomOffset;
-		TraceHitResult.ImpactPoint = ScatterEnd;
 
-		DrawDebugLine(GetWorld(), Start, TraceHitResult.ImpactPoint, FColor::Green, true);
+		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
+		GunInterface->SetScatterRadius(AdjustedRadius);
 	}
 }
 

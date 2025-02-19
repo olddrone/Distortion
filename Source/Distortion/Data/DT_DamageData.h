@@ -39,7 +39,6 @@ struct FDamagePacket
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName EndSocketName;
 
-
 	FDamagePacket& operator=(std::nullptr_t) {
 		AttackType = EAttackType::EAT_Default;
 		AttackDirection = EAttackDirection::EAD_Default;

@@ -29,4 +29,5 @@ public:
 	virtual void Load() = 0;
 	virtual void DecreaseAmmo() = 0;
 	virtual void AmmoChangeEvent() = 0;
+	virtual void SetScatterRadius(const float& InRad) = 0;
 };

@@ -34,7 +34,7 @@ public:
 
 	virtual bool GetLMBDown() const override { return bLMBDown; }
 	virtual bool GetRMBDown() const override { return bRMBDown; }
-	
+
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
 	FORCEINLINE UDT_CombatComponent* GetCombatComponent() const { return CombatComp; }
 	

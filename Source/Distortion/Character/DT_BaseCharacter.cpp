@@ -282,6 +282,7 @@ void ADT_BaseCharacter::Dead()
 {
 	SetActionState(EActionState::EAS_Dead);
 	CombatComp->DestroyWeapon();
+	CombatComp->SetEquipWeapon(false);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));

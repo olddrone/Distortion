@@ -38,6 +38,7 @@ public:
 	virtual void AmmoChangeEvent() override { AmmoChange.ExecuteIfBound(Ammo); }
 
 	virtual void SetUI(const bool bIsEquip, class IDT_HUDInterface* Interface) override;
+	virtual void SetScatterRadius(const float& InRad) override { ScatterRadius = InRad; }
 
 protected:
 	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
@@ -60,6 +61,8 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 Ammo;
+
+	float ScatterRadius;
 
 public:
 	FAmmoChangeDelegate AmmoChange;

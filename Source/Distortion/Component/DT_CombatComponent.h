@@ -150,8 +150,11 @@ private:
 	TWeakObjectPtr<ACharacter> Character;
 	TWeakObjectPtr<APlayerController> Controller;
 
+	float Spread;
+
 public:
 	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }
+	FORCEINLINE float GetSpread() const { return Spread; }
 	
 	FTimerHandle TimerHandle;
 	void StartFireTimer();
@@ -167,5 +170,4 @@ public:
 	FVisibleStatusDelegate VisibleStatus;
 	FImageDelegate Image;
 
-	float Spread;
 };
