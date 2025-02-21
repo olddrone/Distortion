@@ -17,7 +17,7 @@
 
 UDT_CombatComponent::UDT_CombatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> BaseAttackRef(
@@ -43,12 +43,6 @@ UDT_CombatComponent::UDT_CombatComponent()
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
-void UDT_CombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	SetHUDCrosshairs(DeltaTime);
-}
-
 void UDT_CombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,44 +51,12 @@ void UDT_CombatComponent::BeginPlay()
 
 	if (Character.IsValid())
 	{
-		CombatInterface = Cast<IDT_CombatInterface>(Character);
-		MeshInterface = Cast<IDT_MeshInterface>(Character);
-		StateInterface = Cast<IDT_StateInterface>(Character);
+		CombatInterface = TScriptInterface<IDT_CombatInterface>(Character.Get());
+		MeshInterface = TScriptInterface<IDT_MeshInterface>(Character.Get());
+		StateInterface = TScriptInterface<IDT_StateInterface>(Character.Get());
 
 		CollisionManager->SetOwner(Cast<APawn>(Character));
 		CollisionManager->SetActorsToIgnore(Character.Get());
-	}
-}
-
-void UDT_CombatComponent::SetHUDCrosshairs(float DeltaTime)
-{
-	if (Controller.IsValid())
-	{
-		IDT_HUDInterface* HUDInterface = Cast<IDT_HUDInterface>(Controller.Get()->GetHUD());
-		if (HUDInterface)
-		{
-			FCrosshairsTextures Textures;
-
-			if (GetEquipWeapon())
-			{
-				Textures = Weapon->GetCrosshairs();
-				FVector2D WalkSpeedRange(0, Character->GetCharacterMovement()->MaxWalkSpeed);
-				FVector2D VelocityMultiplierRange(0, 1);
-
-				const float Value = (Character->GetCharacterMovement()->IsFalling()) ? 2.25f : 0.f;
-
-				CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, UKismetMathLibrary::VSizeXY(Character->GetVelocity()));
-				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, Value, DeltaTime, 2.25f);
-
-				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairZoom, DeltaTime, 30.f);
-				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
-				
-				Spread = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
-				Spread *= CrosshairSpreadMax;
-				Textures.Spread = Spread;
-			}
-			HUDInterface->SetHUDPackage(Textures);
-		}
 	}
 }
 
@@ -217,6 +179,13 @@ void UDT_CombatComponent::MulticastRPCEquip_Implementation(const bool bIsEquip, 
 
 void UDT_CombatComponent::Reload()
 {
+	IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(GetWeapon());
+	if (GunInterface->GetAmmo() == GunInterface->GetMaxAmmo())
+	{
+		StateInterface->SetActionState(EActionState::EAS_Unoccupied);
+		return;
+	}	
+
 	ServerRPCReload();
 }
 
@@ -249,9 +218,7 @@ void UDT_CombatComponent::CollisionStart(const FDamagePacket& InDamagePacket)
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
-		CrosshairShootingFactor = .75f;
 		FHitResult HitResult;
-
 		if (GetEquipWeapon() && StateInterface->GetEquipWeaponType() == EWeaponType::EWT_Gun)
 			TraceUnderCrosshairs(HitResult);
 
@@ -313,7 +280,7 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 		float CameraFOV = Controller->PlayerCameraManager->GetFOVAngle();
 		float DistanceToImpact = (TraceHitResult.ImpactPoint - Start).Size();
-		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * Spread * (90.0f / CameraFOV);
+		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * CombatInterface->GetSpread() * (90.0f / CameraFOV);
 
 		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
 		GunInterface->SetScatterRadius(AdjustedRadius);

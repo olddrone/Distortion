@@ -13,6 +13,7 @@
 
 class UDT_AttributeComponent;
 class UDT_CombatComponent;
+class UDT_CrosshairComponent;
 
 UCLASS()
 class DISTORTION_API ADT_BaseCharacter : public ACharacter,
@@ -36,8 +37,10 @@ public:
 	virtual bool GetRMBDown() const override { return bRMBDown; }
 
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
-	FORCEINLINE UDT_CombatComponent* GetCombatComponent() const { return CombatComp; }
-	
+	virtual UDT_CombatComponent* GetCombatComponent() const override { return CombatComp; }
+
+	virtual float GetSpread() const override;
+
 protected:
 	// virtual void BeginPlay() override;
 
@@ -87,6 +90,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	TObjectPtr<UDT_CombatComponent> CombatComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
+	TObjectPtr<UDT_CrosshairComponent> CrosshairComp;
 
 public:
 	UFUNCTION()

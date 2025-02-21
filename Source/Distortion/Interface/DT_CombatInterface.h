@@ -25,4 +25,9 @@ public:
 
 	virtual void GetHit(const FVector_NetQuantize& InstigatorLocation, const int8& DamageAmount,
 		const FDamagePacket& DamagePacket) = 0;
+
+	virtual class UDT_CombatComponent* GetCombatComponent() const = 0;
+
+	virtual float GetSpread() const = 0;
+
 };

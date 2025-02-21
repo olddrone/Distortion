@@ -18,7 +18,6 @@ class UDT_CollisionManager;
 DECLARE_DELEGATE_OneParam(FVisibleStatusDelegate, ESlateVisibility);
 DECLARE_DELEGATE_OneParam(FImageDelegate, UTexture2D*);
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DISTORTION_API UDT_CombatComponent : public UActorComponent
 {
@@ -26,7 +25,7 @@ class DISTORTION_API UDT_CombatComponent : public UActorComponent
 
 public:	
 	UDT_CombatComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void Attack(const FName& Section = "Attack01");
@@ -104,7 +103,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void SetHUDCrosshairs(float DeltaTime);
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -128,9 +126,12 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDA_Weapon> WeaponData;
 
-	IDT_CombatInterface* CombatInterface;
-	IDT_MeshInterface* MeshInterface;
-	IDT_StateInterface* StateInterface;
+	UPROPERTY()
+	TScriptInterface<IDT_CombatInterface> CombatInterface;
+	UPROPERTY()
+	TScriptInterface<IDT_MeshInterface> MeshInterface;
+	UPROPERTY()
+	TScriptInterface<IDT_StateInterface> StateInterface;
 
 	const float BaseDamage = 10;
 
@@ -138,24 +139,13 @@ private:
 	bool bEquipWeapon = false;
 
 	UPROPERTY()
-	TObjectPtr<UDT_CollisionManager> CollisionManager;
-
-	float CrosshairVelocityFactor;
-	float CrosshairInAirFactor;
-	float CrosshairAimFactor;
-	float CrosshairShootingFactor;
-	float CrosshairZoom;
-	float CrosshairSpreadMax = 15.f;
-
+	TObjectPtr<UDT_CollisionManager> CollisionManager;	
+	UPROPERTY()
 	TWeakObjectPtr<ACharacter> Character;
+	UPROPERTY()
 	TWeakObjectPtr<APlayerController> Controller;
 
-	float Spread;
-
 public:
-	FORCEINLINE void SetAimFactor(const float InZoom) { CrosshairZoom = InZoom; }
-	FORCEINLINE float GetSpread() const { return Spread; }
-	
 	FTimerHandle TimerHandle;
 	void StartFireTimer();
 

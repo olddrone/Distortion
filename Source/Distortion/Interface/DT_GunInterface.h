@@ -25,6 +25,7 @@ public:
 	virtual float GetAutoFireDelay() const = 0;
 	virtual UAnimMontage* GetReloadMontage() const = 0;
 	virtual uint8 GetAmmo() const = 0;
+	virtual uint8 GetMaxAmmo() const = 0;
 	virtual void SetAmmo(const uint8 InAmmo) = 0;
 	virtual void Load() = 0;
 	virtual void DecreaseAmmo() = 0;

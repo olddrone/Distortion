@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Component/DT_AttributeComponent.h"
 #include "Component/DT_CombatComponent.h"
+#include "Component/DT_CrosshairComponent.h"
 #include "Library/DT_CustomLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -32,6 +33,7 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
+	CrosshairComp = CreateDefaultSubobject<UDT_CrosshairComponent>(TEXT("CrosshairComponent"));
 }
 
 void ADT_BaseCharacter::SetActionState(const EActionState& State)
@@ -69,6 +71,7 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 {
 	bLMBDown = bIsAttack;
 	FName SectionName;
+	CrosshairComp->SetShootingFactor(.75f);
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		SectionName = "Attack01";
 	else
@@ -83,7 +86,7 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 	bRMBDown = bHoldRotationYaw;
 	if(IsLocallyControlled())
 		ServerRPCRMBDown(bHoldRotationYaw);
-	CombatComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
+	CrosshairComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unoccupied)
 		return;
@@ -194,8 +197,7 @@ void ADT_BaseCharacter::DoAttack(const FName& SectionName)
 
 	SetActionState(EActionState::EAS_Attack);
 
-	if (IsLocallyControlled())
-		AttributeComp->UseStamina(CombatComp->GetWeaponCost());
+	AttributeComp->UseStamina(CombatComp->GetWeaponCost());
 
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		ImmediateRotate();
@@ -301,4 +303,9 @@ void ADT_BaseCharacter::SetTeamColor(const ETeam& Team)
 bool ADT_BaseCharacter::HasEnoughStamina(const float& Cost)
 {
 	return AttributeComp->GetStamina() >= Cost;
+}
+
+float ADT_BaseCharacter::GetSpread() const
+{
+	return CrosshairComp->GetSpread();
 }

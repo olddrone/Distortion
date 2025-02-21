@@ -24,19 +24,19 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 
 	if (MuzzleFlashSocket)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Mesh);
-
-		FVector RandomOffset = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0, ScatterRadius);
-		FVector ScatterEnd = TraceHitTarget + RandomOffset;
-
-		FVector ToTarget = ScatterEnd - SocketTransform.GetLocation();
-		FRotator TargetRotation = ToTarget.Rotation();
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Mesh);
+		const FVector RandomOffset = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0, ScatterRadius);
+		const FVector ScatterEnd = TraceHitTarget + RandomOffset;
+		const FVector ToTarget = ScatterEnd - SocketTransform.GetLocation();
+		const FRotator TargetRotation = ToTarget.Rotation();
 
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnedActor, GetOwner());
 
-		// DrawDebugSphere(GetWorld(), TraceHitTarget, ScatterRadius, 12, FColor::Green, true);
-		// DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), SocketTransform.GetLocation() + TargetRotation.Vector() *1000, FColor::Blue, true);
+		/*
+		DrawDebugSphere(GetWorld(), TraceHitTarget, ScatterRadius, 12, FColor::Green, true);
+		DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), SocketTransform.GetLocation() + TargetRotation.Vector() *1000, FColor::Blue, true);
+		*/
 	}
 }

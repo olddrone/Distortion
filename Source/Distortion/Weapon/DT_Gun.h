@@ -32,6 +32,7 @@ public:
 	virtual float GetAutoFireDelay() const override { return FireDelay; }
 	virtual UAnimMontage* GetReloadMontage() const override { return ReloadMontage; }
 	virtual uint8 GetAmmo() const override { return Ammo; }
+	virtual uint8 GetMaxAmmo() const override { return MaxAmmo; }
 	virtual void SetAmmo(const uint8 InAmmo) override;
 	virtual void Load() override { Ammo = MaxAmmo; AmmoChange.ExecuteIfBound(Ammo); }
 	virtual void DecreaseAmmo() override { SetAmmo(Ammo-1); }
