@@ -1,11 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DT_CameraManager.h"
+#include "Camera/DT_LegacyCameraShake.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "Character/DT_PlayerCharacter.h"
-#include "Camera/DT_LegacyCameraShake.h"
 
 ADT_CameraManager::ADT_CameraManager()
 {
@@ -34,8 +33,8 @@ void ADT_CameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 			OutVT.POV.Location += Offset;
 
 		const float ChangeFOV = (bIsZooming) ? ZoomedFOV : DefaultFOV;
-		TestFOV = FMath::FInterpTo(TestFOV, ChangeFOV, DeltaTime, ZoomInterpSpeed);
-		SetFOV(TestFOV);
+		InterpFOV = FMath::FInterpTo(InterpFOV, ChangeFOV, DeltaTime, ZoomInterpSpeed);
+		SetFOV(InterpFOV);
 	}
 	else
 	{

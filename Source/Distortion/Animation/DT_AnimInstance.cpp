@@ -7,7 +7,8 @@
 
 void UDT_AnimInstance::NativeInitializeAnimation()
 {
-	Super::NativeInitializeAnimation(); 
+	Super::NativeInitializeAnimation();
+
 	Character = Cast<ACharacter>(TryGetPawnOwner());
 	if (Character.IsValid())
 	{

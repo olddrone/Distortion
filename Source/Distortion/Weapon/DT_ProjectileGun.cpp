@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DT_ProjectileGun.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "ObjectPool/DT_PoolSubSystem.h"
@@ -17,9 +16,7 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 	if (!CanFire())
 		return;
 
-	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-
-	USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(GetMeshComp());
+	const USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(GetMeshComp());
 	const USkeletalMeshSocket* MuzzleFlashSocket = Mesh->GetSocketByName(FName("MuzzleFlash"));
 
 	if (MuzzleFlashSocket)

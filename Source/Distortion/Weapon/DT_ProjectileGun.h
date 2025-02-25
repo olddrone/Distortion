@@ -16,8 +16,6 @@ class DISTORTION_API ADT_ProjectileGun : public ADT_Gun
 	
 public:
 	ADT_ProjectileGun();
-
-public:
 	virtual void Attack(const FDamagePacket& DamagePacket, const FVector_NetQuantize& TraceHitTarget) override final;
 
 private:

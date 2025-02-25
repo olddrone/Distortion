@@ -28,6 +28,7 @@ public:
 	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) override { HUDPackage = InPackage; }
 	
 	virtual void BindingWeaponVM() override;
+	virtual void GameEndOverlaySet() override;
 
 protected:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
@@ -47,6 +48,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> OverlayWidgetClass;
+	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> OverlayWidget;
+
 private:
 	FCrosshairsTextures HUDPackage;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UUserWidget> GameEndOverlay;
+
+	bool bIsActive = true;
 };

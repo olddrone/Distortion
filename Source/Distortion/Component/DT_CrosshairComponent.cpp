@@ -16,26 +16,33 @@ UDT_CrosshairComponent::UDT_CrosshairComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SetIsReplicatedByDefault(false);
 }
 
 void UDT_CrosshairComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Character = CastChecked<ACharacter>(GetOwner());
-	Controller = CastChecked<APlayerController>(Character->GetController());
+	Character = Cast<ACharacter>(GetOwner());
+	if (Character.IsValid())
+	{
+		Controller = Cast<APlayerController>(Character->GetController());
+		if (Controller.IsValid())
+		{
+			IDT_CombatInterface* CombatInterface = Cast<IDT_CombatInterface>(Character.Get());
+			CombatComponent = CombatInterface->GetCombatComponent();
 
-	IDT_CombatInterface* CombatInterface = Cast<IDT_CombatInterface>(Character.Get());
-	CombatComponent = CombatInterface->GetCombatComponent();
-
-	HUDInterface = TScriptInterface<IDT_HUDInterface>(Controller.Get()->GetHUD());
-	StateInterface = TScriptInterface<IDT_StateInterface>(Character.Get());
+			HUDInterface = TScriptInterface<IDT_HUDInterface>(Controller->GetHUD());
+			StateInterface = TScriptInterface<IDT_StateInterface>(Character.Get());
+		}
+	}
 }
 
 void UDT_CrosshairComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (CombatComponent->GetEquipWeapon())
+	
+	if (CombatComponent && CombatComponent->GetEquipWeapon())
 		SetHUDCrosshairs(DeltaTime);
 }
 

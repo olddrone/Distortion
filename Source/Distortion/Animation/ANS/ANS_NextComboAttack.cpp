@@ -20,7 +20,6 @@ void UANS_NextComboAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 	if (MeshComp)
 	{
-		
 		if (StateInterface->GetLMBDown())
 		{
 			StateInterface->SetActionState(EActionState::EAS_Unoccupied);
@@ -28,6 +27,5 @@ void UANS_NextComboAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 			CombatInterface->DoAttack(SectionName);
 		}
-
 	}
 }

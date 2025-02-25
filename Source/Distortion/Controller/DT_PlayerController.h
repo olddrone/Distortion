@@ -20,6 +20,9 @@ class DISTORTION_API ADT_PlayerController : public APlayerController
 public:
 	ADT_PlayerController();
 
+	UFUNCTION(Client, Reliable)
+	void ClientRPCSetInputMode();
+	
 protected:
 	// virtual void BeginPlay() override;
 
@@ -44,6 +47,8 @@ private:
 
 	void Equip();
 	void Reload();
+	
+	void ClearAllActions();
 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -54,5 +59,6 @@ private:
 
 	UPROPERTY()
 	TScriptInterface<IDT_StateInterface> StateInterface;
+
 
 };

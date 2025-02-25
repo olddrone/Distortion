@@ -23,4 +23,5 @@ class DISTORTION_API IDT_RespawnInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void RequestPlayerRespawn(ACharacter* Character, AController* Controller) = 0;
+	virtual void OnPlayerKill(AController* Controller) = 0;
 };

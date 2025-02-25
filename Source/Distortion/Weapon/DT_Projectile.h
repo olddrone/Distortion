@@ -19,14 +19,13 @@ public:
 	virtual void OnReturnToPool() override;
 
 	UFUNCTION()
-	void ShowTrace();
+	void ShowTrace() { ServerPRCShowTrace(); }
 
 	UFUNCTION(Server, Unreliable)
 	void ServerPRCShowTrace();
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulitcastRPCShowTrace();
-
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,8 +54,11 @@ private:
 
 	FVector StartLocation = FVector::ZeroVector;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float Damage = 10.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float Lifetime = 1.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
 	FDamagePacket BulletPacket;

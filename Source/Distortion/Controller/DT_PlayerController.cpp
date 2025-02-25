@@ -4,9 +4,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/HUD.h"
 #include "Character/DT_PlayerCharacter.h"
 #include "Camera/DT_CameraManager.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Interface/DT_HUDInterface.h"
 
 ADT_PlayerController::ADT_PlayerController()
 {
@@ -22,7 +24,7 @@ void ADT_PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent);
+	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
 
 	EIC->BindAction(InputData->MoveAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Move);
 	EIC->BindAction(InputData->LookAction, ETriggerEvent::Triggered, this, &ADT_PlayerController::Look);	
@@ -132,4 +134,25 @@ void ADT_PlayerController::Equip()
 void ADT_PlayerController::Reload()
 {
 	PlayerCharacter->Reload();
+}
+
+void ADT_PlayerController::ClientRPCSetInputMode_Implementation()
+{
+	ClearAllActions();
+	SetInputMode(FInputModeUIOnly());
+	bShowMouseCursor = true;         
+
+	IDT_HUDInterface* Interface = Cast<IDT_HUDInterface>(GetHUD());
+	if (Interface)
+	{
+		Interface->GameEndOverlaySet();
+	}
+}
+
+void ADT_PlayerController::ClearAllActions()
+{
+	PlayerCharacter->LMB(false);
+	PlayerCharacter->RMB(false);
+
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 }

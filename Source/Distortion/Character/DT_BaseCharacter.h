@@ -13,18 +13,16 @@
 
 class UDT_AttributeComponent;
 class UDT_CombatComponent;
-class UDT_CrosshairComponent;
 
 UCLASS()
 class DISTORTION_API ADT_BaseCharacter : public ACharacter,
-	public IDT_StateInterface, public IDT_CombatInterface, public IDT_InteractionInterface, public IDT_MeshInterface,
-	public IDT_AimOffsetInterface
+	public IDT_StateInterface, public IDT_CombatInterface, public IDT_InteractionInterface, 
+	public IDT_MeshInterface, public IDT_AimOffsetInterface
 {
 	GENERATED_BODY()
 
 public:
 	ADT_BaseCharacter();
-	// virtual void Tick(float DeltaTime) override;
 
 	virtual EActionState GetActionState() const override { return ActionState; }
 	virtual void SetActionState(const EActionState& State) override; // { ActionState = State; }
@@ -39,10 +37,9 @@ public:
 	virtual FTransform GetWeaponSocketTransform(const FName& SocketName) const override;
 	virtual UDT_CombatComponent* GetCombatComponent() const override { return CombatComp; }
 
-	virtual float GetSpread() const override;
+	virtual float GetSpread() const override { return 0.f; }
 
-protected:
-	// virtual void BeginPlay() override;
+
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -91,8 +88,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	TObjectPtr<UDT_CombatComponent> CombatComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
-	TObjectPtr<UDT_CrosshairComponent> CrosshairComp;
 
 public:
 	UFUNCTION()

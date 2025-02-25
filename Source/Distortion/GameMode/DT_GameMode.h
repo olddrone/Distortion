@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "Data/DT_StateSet.h"
 #include "Interface/DT_RespawnInterface.h"
 #include "DT_GameMode.generated.h"
 
@@ -20,5 +21,9 @@ public:
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void RequestPlayerRespawn(ACharacter* Character, AController* Controller) override;
+	virtual void Logout(AController* Exiting) override;
+	virtual void OnPlayerKill(AController* Controller) override;
 
+	void MatchWin(ETeam WinningTeam);
+	void SetAllPlayerControllersInputMode();
 };

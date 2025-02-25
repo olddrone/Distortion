@@ -9,9 +9,6 @@
 #include "Interface/DT_AimOffsetInterface.h"
 #include "DT_AnimInstance.generated.h"
 
-class ACharacter;
-class UCharacterMovementComponent;
-
 /**
  * 
  */
@@ -28,12 +25,15 @@ protected:
 	void SetAOPitch();
 	void SetLeftHandPosition();
 
+	void SetAOYaw(const float& DeltaTime);
+	void CheckTurnInPlace(const float& DeltaTime);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TWeakObjectPtr<ACharacter> Character;
+	TWeakObjectPtr<class ACharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TWeakObjectPtr<UCharacterMovementComponent> CharacterMovement;
+	TWeakObjectPtr<class UCharacterMovementComponent> CharacterMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FVector Velocity;
@@ -80,10 +80,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	uint8 bRotateRootBone : 1;
 
-private:
 	FRotator StartingAimRotation;
 	float InterpAOYaw;
-
-	void SetAOYaw(const float& DeltaTime);
-	void CheckTurnInPlace(const float& DeltaTime);
 };

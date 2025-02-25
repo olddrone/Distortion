@@ -6,7 +6,6 @@
 #include "UObject/NoExportTypes.h"
 #include "DT_CustomLibrary.generated.h"
 
-class APawn;
 USTRUCT()
 struct FData
 {
@@ -27,5 +26,5 @@ public:
 
 	static FName CheckSectionName_Guard(const FName& HitDirection, const uint8& AttackDirection);
 
-	static bool SameTeamCheck(const APawn* A, const APawn* B);
+	static bool SameTeamCheck(const class APawn* A, const class APawn* B);
 };

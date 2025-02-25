@@ -15,11 +15,10 @@ UCLASS()
 class DISTORTION_API ADT_Gun : public ADT_BaseWeapon, public IDT_GunInterface
 {
 	GENERATED_BODY()
+	friend class UDT_VM_EquipWeapon;
 
 public:
 	ADT_Gun();
-
-	// virtual void Tick(float DeltaTime) override;
 
 	virtual void Equip(APawn* OwnerPawn, const FName& InSocketName, class UDT_CollisionManager* InCollisionManager) override;
 
@@ -43,6 +42,7 @@ public:
 
 protected:
 	FORCEINLINE bool CanFire() { return (Ammo > 0) ? true : false; }
+	void InitCrosshairsTexture();
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -65,7 +65,5 @@ protected:
 
 	float ScatterRadius;
 
-public:
 	FAmmoChangeDelegate AmmoChange;
-
 };

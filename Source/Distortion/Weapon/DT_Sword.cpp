@@ -16,6 +16,7 @@ ADT_Sword::ADT_Sword()
 
 	TrailEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TrailEffect"));
 	TrailEffect->SetupAttachment(GetRootComponent());
+
 }
 
 void ADT_Sword::BeginPlay()

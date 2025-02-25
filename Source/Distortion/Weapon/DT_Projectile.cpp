@@ -42,10 +42,10 @@ void ADT_Projectile::OnSpawnFromPool(const FVector_NetQuantize& Location, const 
 	SetActorEnableCollision(true);
 	
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	FVector Direction = GetActorForwardVector().GetSafeNormal();
+	const FVector Direction = GetActorForwardVector().GetSafeNormal();
 	ProjectileMovementComponent->Velocity = Direction * ProjectileSpeed;
 
-	ProjectileMovementComponent->SetUpdatedComponent(CollisionBox);	// 문제 해결
+	ProjectileMovementComponent->SetUpdatedComponent(CollisionBox);
 	ProjectileMovementComponent->bSimulationEnabled = true;
 	ProjectileMovementComponent->UpdateComponentVelocity();
 	ProjectileMovementComponent->Activate();
@@ -60,7 +60,7 @@ void ADT_Projectile::OnSpawnFromPool(const FVector_NetQuantize& Location, const 
 	GetWorld()->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([&] {
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->ReturnToPool(this);
-	}), 1.f, false, -1.0f);
+	}), Lifetime, false);
 }
 
 void ADT_Projectile::OnReturnToPool()
@@ -76,11 +76,6 @@ void ADT_Projectile::OnReturnToPool()
 	ProjectileMovementComponent->Deactivate();
 
 	StartLocation = FVector::ZeroVector;
-}
-
-void ADT_Projectile::ShowTrace()
-{
-	ServerPRCShowTrace();
 }
 
 void ADT_Projectile::ServerPRCShowTrace_Implementation()
@@ -102,7 +97,7 @@ void ADT_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 {
 	if (!UDT_CustomLibrary::SameTeamCheck(Cast<APawn>(GetOwner()), Cast<APawn>(OtherActor)))
 	{
-		float FinalDamage = (Hit.BoneName == "Head") ? Damage * 2.f : Damage;
+		const float FinalDamage = (Hit.BoneName == "Head") ? Damage * 2.f : Damage;
 
 		IDT_CombatInterface* VictimInterface = Cast<IDT_CombatInterface>(OtherActor);
 		if (VictimInterface)

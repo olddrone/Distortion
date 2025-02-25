@@ -3,14 +3,13 @@
 #include "DT_PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameMode.h"
+#include "Component/DT_AttributeComponent.h"
+#include "Component/DT_CrosshairComponent.h"
 #include "Controller/DT_PlayerController.h"
-
 #include "Camera/CameraComponent.h"
 #include "PlayerState/DT_PlayerState.h"
 #include "UI/HUD/DT_HUD.h"
-#include "Component/DT_AttributeComponent.h"
-
-#include "GameFramework/GameMode.h"
 #include "TimerManager.h"
 #include "Interface/DT_RespawnInterface.h"
 #include "Interface/DT_CameraControlInterface.h"
@@ -27,6 +26,8 @@ ADT_PlayerCharacter::ADT_PlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+
+	CrosshairComp = CreateDefaultSubobject<UDT_CrosshairComponent>(TEXT("CrosshairComponent"));
 }
 
 void ADT_PlayerCharacter::RestoreState()
@@ -55,7 +56,6 @@ void ADT_PlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BindingInterface();
 }
 
 void ADT_PlayerCharacter::InitAttributeComp()
@@ -73,6 +73,8 @@ void ADT_PlayerCharacter::InitAttributeComp()
 			Hud->InitOverlay(AttributeComp, CombatComp);
 
 		SetTeamColor(State->GetTeam());
+
+		BindingInterface();
 	}
 }
 
@@ -93,11 +95,15 @@ void ADT_PlayerCharacter::Hit(const FName& SectionName, const EAttackType& Attac
 void ADT_PlayerCharacter::Dead()
 {
 	Super::Dead();
-	
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-		PlayerController->DisableInput(nullptr); 
 
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+		PC->DisableInput(nullptr);
+
+	IDT_RespawnInterface* Interface = Cast<IDT_RespawnInterface>(GetWorld()->GetAuthGameMode());
+	if (Interface)
+		Interface->OnPlayerKill(Controller);
+	
 	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ADT_PlayerCharacter::Respawn, 3.0f, false);
 }
@@ -105,8 +111,22 @@ void ADT_PlayerCharacter::Dead()
 void ADT_PlayerCharacter::RMB(bool bHoldRotationYaw)
 {
 	Super::RMB(bHoldRotationYaw);
+
+	CrosshairComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
+
 	if(GetEquipWeaponType() == EWeaponType::EWT_Gun)
 		CameraInterface->SetZoom(bRMBDown);
+}
+
+void ADT_PlayerCharacter::DoAttack(const FName& SectionName)
+{
+	Super::DoAttack(SectionName);
+	CrosshairComp->SetShootingFactor(.75f);
+}
+
+float ADT_PlayerCharacter::GetSpread() const
+{
+	return CrosshairComp->GetSpread();
 }
 
 void ADT_PlayerCharacter::Respawn()

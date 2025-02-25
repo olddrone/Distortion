@@ -9,16 +9,16 @@ UDT_AttributeComponent::UDT_AttributeComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void UDT_AttributeComponent::InitValue()
-{
-	SetHealth(Attributes.MaxHealth);
-	SetStamina(Attributes.MaxStamina);
-}
-
 void UDT_AttributeComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	InitValue();
+}
+
+void UDT_AttributeComponent::InitValue()
+{
+	SetHealth(Attributes.MaxHealth);
+	SetStamina(Attributes.MaxStamina);
 }
 
 void UDT_AttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

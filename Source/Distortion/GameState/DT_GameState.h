@@ -39,6 +39,9 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore, VisibleAnywhere, BlueprintReadOnly)
 	uint8 BlueTeamScore = 0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	uint8 WinScore = 1;
+
 private:
 	UPROPERTY(EditAnywhere, meta = (PrivateAllowAccess = "true"))
 	TSubclassOf<AActor> PoolActor;

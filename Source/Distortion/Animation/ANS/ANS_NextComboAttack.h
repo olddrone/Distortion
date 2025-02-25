@@ -31,5 +31,4 @@ private:
 
 	UPROPERTY()
 	TScriptInterface<IDT_CombatInterface> CombatInterface;
-
 };

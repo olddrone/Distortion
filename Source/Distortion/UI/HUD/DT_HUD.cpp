@@ -13,7 +13,7 @@ void ADT_HUD::InitOverlay(class UDT_AttributeComponent* InAttributes, class UDT_
 	EquipWeaponVM = NewObject<UDT_VM_EquipWeapon>(this, EquipWeaponVMClass);
 	EquipWeaponVM->Init(InCombat);
 
-    UUserWidget* OverlayWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), OverlayWidgetClass);
+	OverlayWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), OverlayWidgetClass);
     OverlayWidget->AddToViewport();
 }
 
@@ -22,7 +22,7 @@ void ADT_HUD::DrawHUD()
     Super::DrawHUD();
 
 	FVector2D ViewportSize;
-	if (GEngine)
+	if (GEngine && bIsActive)
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
@@ -56,4 +56,11 @@ void ADT_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVect
 	const float ScreenY = ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y;
 		
 	DrawTexture(Texture, ScreenX, ScreenY, TextureWidth, TextureHeight, 0, 0, 1, 1, FLinearColor::Green);
+}
+
+void ADT_HUD::GameEndOverlaySet()
+{
+	OverlayWidget->RemoveFromViewport();
+	bIsActive = false;
+	GameEndOverlay->AddToViewport();
 }

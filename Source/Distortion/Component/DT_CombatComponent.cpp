@@ -1,11 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DT_CombatComponent.h"
-#include "Component/DT_CollisionManager.h"
+#include "DT_CollisionManager.h"
 #include "Weapon/DT_BaseWeapon.h"
 #include "Library/DT_CustomLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Data/DT_Crosshairs.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"

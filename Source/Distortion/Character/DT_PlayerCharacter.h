@@ -7,6 +7,7 @@
 #include "Interface/DT_CameraControlInterface.h"
 #include "DT_PlayerCharacter.generated.h"
 
+class UDT_CrosshairComponent;
 /**
  * 
  */
@@ -26,6 +27,9 @@ public:
 	virtual void Dead() override;
 	virtual void RMB(bool bHoldRotationYaw) override;
 
+	virtual void DoAttack(const FName& SectionName = "Attack01") override;
+	virtual float GetSpread() const override;
+
 protected:
 	virtual void BeginPlay() override;
 	void Respawn();
@@ -41,4 +45,8 @@ private:
 
 	UPROPERTY()
 	TScriptInterface<IDT_CameraControlInterface> CameraInterface;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UDT_CrosshairComponent> CrosshairComp;
 };

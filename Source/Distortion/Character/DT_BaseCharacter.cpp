@@ -4,14 +4,13 @@
 #include "Components/CapsuleComponent.h"
 #include "Component/DT_AttributeComponent.h"
 #include "Component/DT_CombatComponent.h"
-#include "Component/DT_CrosshairComponent.h"
 #include "Library/DT_CustomLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 ADT_BaseCharacter::ADT_BaseCharacter()
 {
- 	PrimaryActorTick.bCanEverTick = true;
+ 	PrimaryActorTick.bCanEverTick = false;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
@@ -33,16 +32,14 @@ ADT_BaseCharacter::ADT_BaseCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	CombatComp = CreateDefaultSubobject<UDT_CombatComponent>(TEXT("CombatComponent"));
-	CrosshairComp = CreateDefaultSubobject<UDT_CrosshairComponent>(TEXT("CrosshairComponent"));
 }
 
 void ADT_BaseCharacter::SetActionState(const EActionState& State)
 {
 	ActionState = State;
 
-	if (ActionState == EActionState::EAS_Unoccupied)
-		AttributeComp->StartRegenTimer();
-	else
+	(ActionState == EActionState::EAS_Unoccupied) ? 
+		AttributeComp->StartRegenTimer() :
 		AttributeComp->StopRegenTimer();
 }
 
@@ -71,7 +68,6 @@ void ADT_BaseCharacter::LMB(bool bIsAttack)
 {
 	bLMBDown = bIsAttack;
 	FName SectionName;
-	CrosshairComp->SetShootingFactor(.75f);
 	if (GetEquipWeaponType() != EWeaponType::EWT_Gun)
 		SectionName = "Attack01";
 	else
@@ -86,7 +82,6 @@ void ADT_BaseCharacter::RMB(bool bHoldRotationYaw)
 	bRMBDown = bHoldRotationYaw;
 	if(IsLocallyControlled())
 		ServerRPCRMBDown(bHoldRotationYaw);
-	CrosshairComp->SetAimFactor(bHoldRotationYaw ? 0.58f : 0.f);
 
 	if (GetActionState() != EActionState::EAS_Unoccupied)
 		return;
@@ -141,7 +136,7 @@ void ADT_BaseCharacter::Dodge()
 
 void ADT_BaseCharacter::ImmediateRotate()
 {
-	// 오른쪽이면 cos, 왼쪽이면 acos로 바꿔야
+	// 오른쪽이면 cos, 왼쪽이면 acos로 바꿔야?
 	if (bRMBDown) // 현재 보고 있는 방향으로 회전
 	{
 		FRotator Rotation = GetControlRotation();
@@ -305,7 +300,3 @@ bool ADT_BaseCharacter::HasEnoughStamina(const float& Cost)
 	return AttributeComp->GetStamina() >= Cost;
 }
 
-float ADT_BaseCharacter::GetSpread() const
-{
-	return CrosshairComp->GetSpread();
-}

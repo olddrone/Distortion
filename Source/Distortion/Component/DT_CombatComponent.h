@@ -90,7 +90,7 @@ public:
 
 	void DestroyWeapon();
 
-	FORCEINLINE float GetWeaponCost() const { return (GetEquipWeapon()) ? WeaponData->AttackCost : 10.f; }
+	FORCEINLINE float GetWeaponCost() const { return (GetEquipWeapon()) ? WeaponData->AttackCost : BaseAttackCost; }
 	FORCEINLINE ADT_BaseWeapon* GetWeapon() const { return Weapon; }
 
 public:
@@ -133,7 +133,8 @@ private:
 	UPROPERTY()
 	TScriptInterface<IDT_StateInterface> StateInterface;
 
-	const float BaseDamage = 10;
+	const float BaseDamage = 10.f;
+	const float BaseAttackCost = 5.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bEquipWeapon = false;

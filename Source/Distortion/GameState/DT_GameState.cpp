@@ -3,6 +3,8 @@
 #include "DT_GameState.h"
 #include "ObjectPool/DT_PoolSubSystem.h"
 #include "Net/UnrealNetwork.h"
+#include "GameMode/DT_GameMode.h"
+#include "Data/DT_StateSet.h"
 
 void ADT_GameState::BeginPlay()
 {
@@ -21,7 +23,8 @@ void ADT_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 }
 
 void ADT_GameState::OnRep_RedTeamScore()
-{	/*
+{	
+	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
 		GetWorld()->GetFirstPlayerController());
 	if (BPlayer)
@@ -30,7 +33,8 @@ void ADT_GameState::OnRep_RedTeamScore()
 }
 
 void ADT_GameState::OnRep_BlueTeamScore()
-{	/*
+{	
+	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
 		GetWorld()->GetFirstPlayerController());
 	if (BPlayer)
@@ -41,6 +45,13 @@ void ADT_GameState::OnRep_BlueTeamScore()
 void ADT_GameState::RedTeamInc()
 {
 	++RedTeamScore;
+
+	if (RedTeamScore >= WinScore)
+	{
+		ADT_GameMode* GM = Cast<ADT_GameMode>(GetWorld()->GetAuthGameMode());
+		if (GM)
+			GM->MatchWin(ETeam::ET_RedTeam);
+	}
 
 	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
@@ -53,6 +64,13 @@ void ADT_GameState::RedTeamInc()
 void ADT_GameState::BlueTeamInc()
 {
 	++BlueTeamScore;
+
+	if (BlueTeamScore >= WinScore)
+	{	
+		ADT_GameMode* GM = Cast<ADT_GameMode>(GetWorld()->GetAuthGameMode());
+		if (GM)
+			GM->MatchWin(ETeam::ET_BlueTeam);
+	}
 
 	/*
 	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(

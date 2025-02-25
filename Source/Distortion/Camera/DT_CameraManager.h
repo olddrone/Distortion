@@ -38,7 +38,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed = 20.0f;
 
-	float TestFOV;
+	float InterpFOV;
 	bool bIsZooming = false; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
