@@ -11,7 +11,10 @@ void UAN_RestoreState::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 	if (MeshComp)
 	{
 		IDT_StateInterface* Interface = Cast<IDT_StateInterface>(MeshComp->GetOwner());
-		Interface->SetActionState(ActionState);
-		Interface->RestoreState();
+		if (Interface)
+		{
+			Interface->SetActionState(ActionState);
+			Interface->RestoreState();
+		}
 	}
 }

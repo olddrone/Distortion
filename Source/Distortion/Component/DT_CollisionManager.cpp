@@ -25,11 +25,11 @@ void UDT_CollisionManager::StopCollision()
 
 void UDT_CollisionManager::TraceCheck()
 {
-    TArray<FHitResult> HitResults;
-    FVector CurStart = MeshInterface->GetSocketLocation(DamagePacket.StartSocketName);
-    FVector CurEnd = MeshInterface->GetSocketLocation(DamagePacket.EndSocketName);
+	TArray<FHitResult> HitResults;
+	FVector CurStart = MeshInterface->GetSocketLocation(DamagePacket.StartSocketName);
+	FVector CurEnd = MeshInterface->GetSocketLocation(DamagePacket.EndSocketName);
 
-	(CurStart == CurEnd) 
+	(CurStart == CurEnd)
 		? DoSphereTrace(CurStart, HitResults, FColor::Blue)
 		: DoLineTrace(CurStart, CurEnd, HitResults, FColor::Blue);
 
@@ -41,9 +41,10 @@ void UDT_CollisionManager::TraceCheck()
 
 	DoLineTrace(BeforePoints.Key, CurStart, HitResults, FColor::Blue);
 	DoLineTrace(BeforePoints.Value, CurEnd, HitResults, FColor::Blue);
-	
-	TPair<FVector,FVector> CtrlPoint = CalculateControlPoints(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd);
+
+	TPair<FVector, FVector> CtrlPoint = CalculateControlPoints(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd);
 	PerformInterpolatedTraces(BeforePoints.Key, CurStart, BeforePoints.Value, CurEnd, CtrlPoint, HitResults);
+
 
 	HandleHitResults(HitResults);
 	BeforePoints = { CurStart, CurEnd };

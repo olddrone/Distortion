@@ -11,6 +11,7 @@ void UAN_EquipCheck::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase*
 	if (MeshComp)
 	{
 		IDT_InteractionInterface* Interface = Cast<IDT_InteractionInterface>(MeshComp->GetOwner());
-		Interface->ToAttachSocket(SocketName);
+		if (Interface)
+			Interface->ToAttachSocket(SocketName);
 	}
 }

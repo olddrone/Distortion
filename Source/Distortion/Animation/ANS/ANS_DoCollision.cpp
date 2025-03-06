@@ -9,7 +9,8 @@ void UANS_DoCollision::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequen
 	if (MeshComp)
 	{
 		CombatInterface = TScriptInterface<IDT_CombatInterface>(MeshComp->GetOwner());
-		CombatInterface->ActivateCollision(DamagePacket);
+		if (CombatInterface)
+			CombatInterface->ActivateCollision(DamagePacket);
 	}
 }
 
@@ -17,7 +18,7 @@ void UANS_DoCollision::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequence
 	const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
-	if (MeshComp)
+	if (MeshComp && CombatInterface)
 	{
 		// 다시 해주어야 문제가 없음
 		CombatInterface = TScriptInterface<IDT_CombatInterface>(MeshComp->GetOwner());

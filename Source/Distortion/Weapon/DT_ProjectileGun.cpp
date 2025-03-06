@@ -22,18 +22,17 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 	if (MuzzleFlashSocket)
 	{
 		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Mesh);
+		const FVector StartLocation = SocketTransform.GetLocation();
+
 		const FVector RandomOffset = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0, ScatterRadius);
 		const FVector ScatterEnd = TraceHitTarget + RandomOffset;
-		const FVector ToTarget = ScatterEnd - SocketTransform.GetLocation();
+		const FVector ToTarget = (ScatterEnd - StartLocation).GetSafeNormal();
 		const FRotator TargetRotation = ToTarget.Rotation();
 
 		AActor* SpawnedActor = nullptr;
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
-		PoolSubSystem->SpawnFromPool(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnedActor, GetOwner());
+		PoolSubSystem->SpawnFromPool(ProjectileClass, StartLocation, TargetRotation, SpawnedActor, GetOwner());
 
-		/*
-		DrawDebugSphere(GetWorld(), TraceHitTarget, ScatterRadius, 12, FColor::Green, true);
-		DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), SocketTransform.GetLocation() + TargetRotation.Vector() *1000, FColor::Blue, true);
-		*/
+		DrawDebugLine(GetWorld(), StartLocation, StartLocation + TargetRotation.Vector() *5000, FColor::Orange, true);
 	}
 }

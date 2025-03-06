@@ -18,7 +18,7 @@ void UANS_NextComboAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeq
 {
 	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
-	if (MeshComp)
+	if (MeshComp && StateInterface && CombatInterface)
 	{
 		if (StateInterface->GetLMBDown())
 		{
