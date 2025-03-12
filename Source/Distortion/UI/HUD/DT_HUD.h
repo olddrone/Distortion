@@ -10,6 +10,7 @@
 
 class UDT_VM_Attribute;
 class UDT_VM_EquipWeapon;
+class UDT_VM_TeamScore;
 /**
  * 
  */
@@ -24,7 +25,9 @@ public:
 	virtual void DrawHUD() override;
 
 	FORCEINLINE UDT_VM_Attribute* GetAttributeVM() const { return AttributeVM; }
-	UDT_VM_EquipWeapon* GetEquipWeaponVM() const { return EquipWeaponVM; }
+	FORCEINLINE UDT_VM_EquipWeapon* GetEquipWeaponVM() const { return EquipWeaponVM; }
+	FORCEINLINE UDT_VM_TeamScore* GetTeamScoreVM() const { return TeamScoreVM; }
+	
 	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) override { HUDPackage = InPackage; }
 	
 	virtual void BindingWeaponVM() override;
@@ -45,6 +48,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDT_VM_EquipWeapon> EquipWeaponVMClass;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TObjectPtr<UDT_VM_TeamScore> TeamScoreVM;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDT_VM_TeamScore> TeamScoreVMClass;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> OverlayWidgetClass;

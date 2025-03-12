@@ -106,7 +106,7 @@ public:
 	void MulticastRPCRotate(const FQuat4d& Quat);
 
 	UFUNCTION()
-	void Equip();
+	virtual void Equip();
 
 	UFUNCTION()
 	void Reload();

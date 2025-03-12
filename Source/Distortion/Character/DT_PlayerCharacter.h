@@ -46,7 +46,6 @@ private:
 	UPROPERTY()
 	TScriptInterface<IDT_CameraControlInterface> CameraInterface;
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDT_CrosshairComponent> CrosshairComp;
 };

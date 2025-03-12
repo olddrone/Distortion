@@ -25,7 +25,6 @@ void UDT_VM_EquipWeapon::BindCallbacks()
 
 void UDT_VM_EquipWeapon::BindAmmo()
 {
-	// BaseWeapon 및 인터페이스로 추상화 필요
 	ADT_Gun* Gun = Cast<ADT_Gun>(Combat->GetWeapon());
 	if (IsValid(Gun))
 		Gun->AmmoChange.BindUObject(this, &UDT_VM_EquipWeapon::SetAmmo);

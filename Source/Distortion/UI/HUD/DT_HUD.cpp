@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DT_HUD.h"
+#include "Blueprint/UserWidget.h"
 #include "UI/ViewModel/DT_VM_Attribute.h"
 #include "UI/ViewModel/DT_VM_EquipWeapon.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/ViewModel/DT_VM_TeamScore.h"
 
 void ADT_HUD::InitOverlay(class UDT_AttributeComponent* InAttributes, class UDT_CombatComponent* InCombat)
 {
@@ -12,6 +13,9 @@ void ADT_HUD::InitOverlay(class UDT_AttributeComponent* InAttributes, class UDT_
 
 	EquipWeaponVM = NewObject<UDT_VM_EquipWeapon>(this, EquipWeaponVMClass);
 	EquipWeaponVM->Init(InCombat);
+
+	TeamScoreVM = NewObject<UDT_VM_TeamScore>(this, TeamScoreVMClass);
+	TeamScoreVM->Init();
 
 	OverlayWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), OverlayWidgetClass);
     OverlayWidget->AddToViewport();

@@ -33,6 +33,6 @@ void ADT_ProjectileGun::Attack(const FDamagePacket& DamagePacket, const FVector_
 		UDT_PoolSubSystem* PoolSubSystem = GetWorld()->GetSubsystem<UDT_PoolSubSystem>();
 		PoolSubSystem->SpawnFromPool(ProjectileClass, StartLocation, TargetRotation, SpawnedActor, GetOwner());
 
-		DrawDebugLine(GetWorld(), StartLocation, StartLocation + TargetRotation.Vector() *5000, FColor::Orange, true);
+		// DrawDebugLine(GetWorld(), StartLocation, StartLocation + TargetRotation.Vector() * 5000, FColor::Orange, true);
 	}
 }

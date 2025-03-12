@@ -278,13 +278,13 @@ void ADT_BaseCharacter::ServerRPCAnimTickOption_Implementation(const EVisibility
 void ADT_BaseCharacter::Dead()
 {
 	SetActionState(EActionState::EAS_Dead);
-	CombatComp->DestroyWeapon();
+	
 	CombatComp->SetEquipWeapon(false);
+	CombatComp->DestroyWeapon();
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
-
 }
 
 void ADT_BaseCharacter::SetTeamColor(const ETeam& Team)

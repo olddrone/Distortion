@@ -6,6 +6,7 @@
 #include "GameFramework/GameState.h"
 #include "DT_GameState.generated.h"
 
+DECLARE_DELEGATE_OneParam(FTeamScoreChangeDelegate, uint8);
 /**
  * 
  */
@@ -14,6 +15,7 @@ class DISTORTION_API ADT_GameState : public AGameState
 {
 	GENERATED_BODY()
 	friend class ADT_GameMode;
+	friend class UDT_VM_TeamScore;
 public:
 	// ADT_GameState();
 
@@ -26,11 +28,16 @@ public:
 	void OnRep_BlueTeamScore();
 
 	void RedTeamInc();
-
 	void BlueTeamInc();
+
+	FORCEINLINE uint8 GetRedTeamScore() const { return RedTeamScore; }
+	FORCEINLINE uint8 GetBlueTeamScore() const { return BlueTeamScore; }
 
 protected:
 	virtual void BeginPlay() override;
+
+	FTeamScoreChangeDelegate RedTeamScoreChange;
+	FTeamScoreChangeDelegate BlueTeamScoreChange;
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore, VisibleAnywhere, BlueprintReadOnly)
@@ -40,7 +47,7 @@ protected:
 	uint8 BlueTeamScore = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	uint8 WinScore = 1;
+	uint8 WinScore = 3;
 
 private:
 	UPROPERTY(EditAnywhere, meta = (PrivateAllowAccess = "true"))

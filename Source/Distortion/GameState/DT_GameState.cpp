@@ -23,47 +23,33 @@ void ADT_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 }
 
 void ADT_GameState::OnRep_RedTeamScore()
-{	
-	/*
-	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
-		GetWorld()->GetFirstPlayerController());
-	if (BPlayer)
-		BPlayer->SetHUDRedTeamScore(RedTeamScore);
-	*/
+{
+	RedTeamScoreChange.ExecuteIfBound(RedTeamScore);
 }
 
 void ADT_GameState::OnRep_BlueTeamScore()
-{	
-	/*
-	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
-		GetWorld()->GetFirstPlayerController());
-	if (BPlayer)
-		BPlayer->SetHUDRedTeamScore(RedTeamScore);
-	*/
+{
+	BlueTeamScoreChange.ExecuteIfBound(BlueTeamScore);
 }
 
 void ADT_GameState::RedTeamInc()
 {
 	++RedTeamScore;
+	RedTeamScoreChange.ExecuteIfBound(RedTeamScore);
 
 	if (RedTeamScore >= WinScore)
 	{
 		ADT_GameMode* GM = Cast<ADT_GameMode>(GetWorld()->GetAuthGameMode());
 		if (GM)
 			GM->MatchWin(ETeam::ET_RedTeam);
-	}
 
-	/*
-	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
-		GetWorld()->GetFirstPlayerController());
-	if (BPlayer)
-		BPlayer->SetHUDRedTeamScore(RedTeamScore);
-	*/
+	}
 }
 
 void ADT_GameState::BlueTeamInc()
 {
 	++BlueTeamScore;
+	BlueTeamScoreChange.ExecuteIfBound(BlueTeamScore);
 
 	if (BlueTeamScore >= WinScore)
 	{	
@@ -71,11 +57,4 @@ void ADT_GameState::BlueTeamInc()
 		if (GM)
 			GM->MatchWin(ETeam::ET_BlueTeam);
 	}
-
-	/*
-	ABlasterPlayerController* BPlayer = Cast<ABlasterPlayerController>(
-		GetWorld()->GetFirstPlayerController());
-	if (BPlayer)
-		BPlayer->SetHUDBlueTeamScore(BlueTeamScore);
-	*/
 }
