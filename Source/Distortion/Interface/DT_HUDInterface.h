@@ -25,4 +25,6 @@ public:
 	virtual void SetHUDPackage(const struct FCrosshairsTextures& InPackage) = 0;
 	virtual void BindingWeaponVM() = 0;
 	virtual void GameEndOverlaySet() = 0;
+
+	virtual void ToggleCrosshair(const bool& bIsShow) = 0;
 };

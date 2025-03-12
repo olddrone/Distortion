@@ -37,5 +37,6 @@ void ADT_BaseWeapon::Equip(APawn* OwnerPawn, const FName& InSocketName, UDT_Coll
 
 void ADT_BaseWeapon::SetUI(const bool bIsEquip, IDT_HUDInterface* Interface)
 {
+	Interface->ToggleCrosshair(bIsEquip);
 	Interface->BindingWeaponVM();
 }

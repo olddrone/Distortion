@@ -40,7 +40,6 @@ public:
 	virtual float GetSpread() const override { return 0.f; }
 
 
-
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PlayMontage(UAnimMontage* Montage, const FName& SectionName = "Default") override;

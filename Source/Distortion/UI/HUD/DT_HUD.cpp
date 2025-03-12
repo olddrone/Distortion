@@ -65,6 +65,6 @@ void ADT_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVect
 void ADT_HUD::GameEndOverlaySet()
 {
 	OverlayWidget->RemoveFromViewport();
-	bIsActive = false;
+	ToggleCrosshair(false);
 	GameEndOverlay->AddToViewport();
 }

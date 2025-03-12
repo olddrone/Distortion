@@ -27,7 +27,7 @@ public:
 	FORCEINLINE UDT_VM_Attribute* GetAttributeVM() const { return AttributeVM; }
 	FORCEINLINE UDT_VM_EquipWeapon* GetEquipWeaponVM() const { return EquipWeaponVM; }
 	FORCEINLINE UDT_VM_TeamScore* GetTeamScoreVM() const { return TeamScoreVM; }
-	
+	virtual void ToggleCrosshair(const bool& bIsShow) override { bIsActive = bIsShow; }
 	virtual void SetHUDPackage(const FCrosshairsTextures& InPackage) override { HUDPackage = InPackage; }
 	
 	virtual void BindingWeaponVM() override;

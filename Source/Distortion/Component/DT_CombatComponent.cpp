@@ -42,12 +42,20 @@ UDT_CombatComponent::UDT_CombatComponent()
 	CollisionManager = CreateDefaultSubobject<UDT_CollisionManager>(TEXT("CollisionManager"));
 }
 
-void UDT_CombatComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	Character = Cast<ACharacter>(GetOwner()); 
-	Controller = Cast<APlayerController>(Character->GetController());
 
+void UDT_CombatComponent::DestroyWeapon()
+{
+	WeaponData = nullptr;
+	if (IsValid(Weapon)) 
+		Weapon->Destroy();
+
+	VisibleStatus.ExecuteIfBound(ESlateVisibility::Hidden);
+}
+
+void UDT_CombatComponent::Init()
+{
+	Character = Cast<ACharacter>(GetOwner());
+	Controller = Cast<APlayerController>(Character->GetController());
 	if (Character.IsValid())
 	{
 		CombatInterface = TScriptInterface<IDT_CombatInterface>(Character.Get());
@@ -57,15 +65,6 @@ void UDT_CombatComponent::BeginPlay()
 		CollisionManager->SetOwner(Cast<APawn>(Character));
 		CollisionManager->SetActorsToIgnore(Character.Get());
 	}
-}
-
-void UDT_CombatComponent::DestroyWeapon()
-{
-	WeaponData = nullptr;
-	if (IsValid(Weapon)) 
-		Weapon->Destroy();
-
-	VisibleStatus.ExecuteIfBound(ESlateVisibility::Hidden);
 }
 
 UMeshComponent* UDT_CombatComponent::GetWeaponMesh() const

@@ -26,6 +26,7 @@ class DISTORTION_API UDT_CombatComponent : public UActorComponent
 public:	
 	UDT_CombatComponent();
 	// virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void Init();
 
 	UFUNCTION()
 	void Attack(const FName& Section = "Attack01");
@@ -92,6 +93,7 @@ public:
 
 	FORCEINLINE float GetWeaponCost() const { return (GetEquipWeapon()) ? WeaponData->AttackCost : BaseAttackCost; }
 	FORCEINLINE ADT_BaseWeapon* GetWeapon() const { return Weapon; }
+	
 
 public:
 	FORCEINLINE void SetEquipWeapon(const bool InEquipWeapon) { bEquipWeapon = InEquipWeapon; }
@@ -99,9 +101,6 @@ public:
 	FORCEINLINE bool GetHasEquipWeapon() const { return Weapon != nullptr; }
 	FORCEINLINE UMeshComponent* GetWeaponMesh() const;
 	FTransform GetMeshSocketTransform(const FName& SocketName);
-
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);

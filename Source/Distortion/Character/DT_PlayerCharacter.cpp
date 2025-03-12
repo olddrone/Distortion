@@ -4,6 +4,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameMode.h"
+#include "Component/DT_CombatComponent.h"
 #include "Component/DT_AttributeComponent.h"
 #include "Component/DT_CrosshairComponent.h"
 #include "Controller/DT_PlayerController.h"
@@ -67,6 +68,8 @@ void ADT_PlayerCharacter::InitAttributeComp()
 		AttributeComp->InitValue();
 		AttributeComp->Dead.AddUObject(this, &ADT_PlayerCharacter::Dead);
 
+		CombatComp->Init();
+
 		const APlayerController* PC = GetController<APlayerController>();
 		ADT_HUD* Hud = (PC) ? PC->GetHUD<ADT_HUD>() : nullptr;
 		if (IsValid(Hud))
@@ -98,7 +101,12 @@ void ADT_PlayerCharacter::Dead()
 
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (PC)
+	{
 		PC->DisableInput(nullptr);
+		ADT_HUD* Hud = (PC) ? PC->GetHUD<ADT_HUD>() : nullptr;
+		if (Hud)
+			Hud->ToggleCrosshair(false);
+	}
 
 	IDT_RespawnInterface* Interface = Cast<IDT_RespawnInterface>(GetWorld()->GetAuthGameMode());
 	if (Interface)
