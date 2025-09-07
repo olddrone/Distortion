@@ -229,7 +229,7 @@ void UDT_CombatComponent::ServerRPCCollisionStart_Implementation(const FDamagePa
 {
 	if (GetEquipWeapon())
 	{
-		Weapon->Attack(DamagePacket, TraceHitTarget); // ¼­¹ö¿¡¼­ È£ÃâÇÔ
+		Weapon->Attack(DamagePacket, TraceHitTarget); // Â¼Â­Â¹Ã¶Â¿Â¡Â¼Â­ ÃˆÂ£ÃƒÃ¢Ã‡Ã”
 		MulticastRPCShowCosmetic(true);
 	}
 	else
@@ -278,7 +278,7 @@ void UDT_CombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 		float CameraFOV = Controller->PlayerCameraManager->GetFOVAngle();
 		float DistanceToImpact = (TraceHitResult.ImpactPoint - Start).Size();
-		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * CombatInterface->GetSpread() * (90.0f / CameraFOV);
+		float AdjustedRadius = (DistanceToImpact / DistanceToCharacter) * CombatInterface->GetSpread() * (CameraFOV / 90.0f);
 
 		IDT_GunInterface* GunInterface = Cast<IDT_GunInterface>(Weapon);
 		GunInterface->SetScatterRadius(AdjustedRadius);
